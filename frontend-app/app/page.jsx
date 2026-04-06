@@ -10,6 +10,13 @@ export default function Home() {
   // [프론트엔드 테스트용 State] 대화 목록을 관리합니다.
   const [messages, setMessages] = useState(initialMessages);
   const scrollRef = useRef(null);
+  const nextMessageIdRef = useRef(initialMessages.length);
+
+  // 렌더 중 Date.now를 호출하지 않도록, 이벤트마다 순차 ID를 발급합니다.
+  const getNextMessageId = () => {
+    nextMessageIdRef.current += 1;
+    return nextMessageIdRef.current;
+  };
 
   // 메시지가 추가될 때마다 자동으로 맨 아래로 스크롤합니다.
   useEffect(() => {
@@ -22,7 +29,7 @@ export default function Home() {
   const handleSendMessage = (text) => {
     // 1. 사용자 메시지 목록에 추가
     const newUserMessage = {
-      id: Date.now(),
+      id: getNextMessageId(),
       sender: "user",
       reply: text,
     };
@@ -33,7 +40,7 @@ export default function Home() {
     setTimeout(() => {
       const botResponse = getMockResponse(text);
       const newBotMessage = {
-        id: Date.now() + 1,
+        id: getNextMessageId(),
         sender: "bot",
         reply: botResponse.reply,
         intent: botResponse.intent,
