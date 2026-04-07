@@ -13,6 +13,7 @@ export default function BottomNav() {
         padding: "16px",
         backgroundColor: "#111",
         borderTop: "1px solid #333",
+        zIndex: 100,
       }}
     >
       <Link href="/" style={{ color: "white", textDecoration: "none" }}>
