@@ -87,7 +87,7 @@ export default function PhonePage() {
   );
 
   return (
-    <div className="-mx-4 -mt-4 min-h-[calc(100vh-136px)] bg-[#f7f2ea] px-4 py-5">
+    <div className="min-h-[calc(100vh-136px)] bg-[#f7f2ea] px-4 py-5">
       <section className="rounded-[28px] border border-[#eadfd2] bg-[#fffaf4] p-4 shadow-[0_18px_40px_rgba(42,53,80,0.06)]">
         <div>
           <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[#d6814d]">

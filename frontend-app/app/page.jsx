@@ -58,7 +58,7 @@ export default function Home() {
 
   // h-[calc(100vh-136px)] matches viewport height minus Header(56px) and BottomNav(80px padding area approx)
   return (
-    <div className="flex flex-col h-[calc(100vh-136px)] -mx-4 -mt-4 bg-gray-100">
+    <div className="flex flex-col h-[calc(100vh-136px)] bg-gray-100">
       
       {/* 채팅 메시지가 출력되는 스크롤 영역 */}
       <div 
