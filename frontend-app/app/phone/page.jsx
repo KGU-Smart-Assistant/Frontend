@@ -1,9 +1,11 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Building2, MapPin, PhoneCall, Search, X } from "lucide-react";
 
 import { campusTabs, phoneDirectory } from "@/data/phoneDirectory";
+
+const ALL_CATEGORY = "전체";
 
 const normalizeText = (value) =>
   String(value ?? "")
@@ -39,19 +41,44 @@ const categoryToneMap = {
   },
 };
 
+const defaultTone = {
+  badge: "border-[#d9dee6] bg-[#f4f7fa] text-[#64748b]",
+  icon: "bg-[#e7eef6] text-[#64748b]",
+};
+
 export default function PhonePage() {
   const [activeCampus, setActiveCampus] = useState(campusTabs[0]?.campus ?? "");
+  const [activeCategory, setActiveCategory] = useState(ALL_CATEGORY);
   const [keyword, setKeyword] = useState("");
   const deferredKeyword = useDeferredValue(keyword);
 
   const currentCampusInfo =
     campusTabs.find((item) => item.campus === activeCampus) ?? campusTabs[0];
 
+  const campusSections = useMemo(
+    () => phoneDirectory.filter((section) => section.campus === activeCampus),
+    [activeCampus],
+  );
+
+  const availableCategories = useMemo(
+    () => [ALL_CATEGORY, ...campusSections.map((section) => section.category)],
+    [campusSections],
+  );
+
+  useEffect(() => {
+    if (!availableCategories.includes(activeCategory)) {
+      setActiveCategory(ALL_CATEGORY);
+    }
+  }, [activeCategory, availableCategories]);
+
   const filteredSections = useMemo(() => {
     const normalizedKeyword = normalizeText(deferredKeyword);
 
-    return phoneDirectory
-      .filter((section) => section.campus === activeCampus)
+    return campusSections
+      .filter(
+        (section) =>
+          activeCategory === ALL_CATEGORY || section.category === activeCategory,
+      )
       .map((section) => {
         const sectionMatched =
           normalizedKeyword.length > 0 &&
@@ -79,7 +106,12 @@ export default function PhonePage() {
         };
       })
       .filter((section) => section.departments.length > 0);
-  }, [activeCampus, deferredKeyword]);
+  }, [activeCategory, campusSections, deferredKeyword]);
+
+  const campusContactCount = campusSections.reduce(
+    (total, section) => total + section.departments.length,
+    0,
+  );
 
   const visibleCount = filteredSections.reduce(
     (total, section) => total + section.departments.length,
@@ -87,7 +119,7 @@ export default function PhonePage() {
   );
 
   return (
-    <div className="-mx-4 -mt-4 min-h-[calc(100vh-136px)] bg-[#f7f2ea] px-4 py-5">
+    <main className="min-h-[calc(100dvh-136px)] bg-[#f7f2ea] px-4 py-5 text-[#27324b]">
       <section className="rounded-[28px] border border-[#eadfd2] bg-[#fffaf4] p-4 shadow-[0_18px_40px_rgba(42,53,80,0.06)]">
         <div>
           <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[#d6814d]">
@@ -96,7 +128,7 @@ export default function PhonePage() {
           <h1 className="mt-2 text-[26px] font-extrabold tracking-[-0.05em] text-[#27324b]">
             전화번호 안내
           </h1>
-          <p className="mt-2 text-sm leading-6 text-[#677489]">
+          <p className="mt-2 break-keep text-sm leading-6 text-[#677489]">
             캠퍼스별 주요 부서 연락처를 빠르게 찾고 바로 전화 연결할 수 있습니다.
           </p>
         </div>
@@ -110,6 +142,7 @@ export default function PhonePage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveCampus(tab.campus)}
+                aria-pressed={isActive}
                 className={`rounded-full px-4 py-3 text-sm font-extrabold transition ${
                   isActive
                     ? "bg-[#f4a15e] text-white shadow-[0_12px_24px_rgba(244,161,94,0.22)]"
@@ -123,17 +156,35 @@ export default function PhonePage() {
         </div>
 
         {currentCampusInfo ? (
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 rounded-[22px] border border-[#ece1d3] bg-white/70 p-4">
             <div className="flex items-start gap-2 text-sm text-[#526076]">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#d6814d]" />
               <p className="font-semibold leading-5">{currentCampusInfo.address}</p>
             </div>
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs leading-5 text-[#8c96a7]">
-                {currentCampusInfo.description}
-              </p>
-              <div className="shrink-0 rounded-full bg-[#edf6eb] px-3 py-1.5 text-xs font-extrabold text-[#4f8e76]">
-                {visibleCount}개 연락처
+
+            <p className="mt-3 break-keep text-xs leading-5 text-[#8c96a7]">
+              {currentCampusInfo.description}
+            </p>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="rounded-[18px] bg-[#f8f2ea] px-3 py-3">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#9a8671]">
+                  Category
+                </p>
+                <p className="mt-1 text-lg font-extrabold text-[#374151]">
+                  {campusSections.length}개
+                </p>
+              </div>
+              <div className="rounded-[18px] bg-[#edf6eb] px-3 py-3">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#5d8a75]">
+                  Contacts
+                </p>
+                <p className="mt-1 text-lg font-extrabold text-[#2f6d59]">
+                  {visibleCount}
+                  <span className="ml-1 text-xs font-bold text-[#6c8178]">
+                    / {campusContactCount}
+                  </span>
+                </p>
               </div>
             </div>
           </div>
@@ -159,18 +210,40 @@ export default function PhonePage() {
             </button>
           ) : null}
         </div>
+
+        <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+          {availableCategories.map((category) => {
+            const isActive = category === activeCategory;
+
+            return (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setActiveCategory(category)}
+                aria-pressed={isActive}
+                className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition ${
+                  isActive
+                    ? "border-[#efaa6f] bg-[#fef0e4] text-[#c87441]"
+                    : "border-[#e7dbcc] bg-white text-[#7b8798]"
+                }`}
+              >
+                {category}
+              </button>
+            );
+          })}
+        </div>
       </section>
 
       <section className="mt-5 space-y-5">
         {filteredSections.length > 0 ? (
           filteredSections.map((section) => {
-            const tone = categoryToneMap[section.category] ?? {
-              badge: "border-[#d9dee6] bg-[#f4f7fa] text-[#64748b]",
-              icon: "bg-[#e7eef6] text-[#64748b]",
-            };
+            const tone = categoryToneMap[section.category] ?? defaultTone;
 
             return (
-              <section key={`${section.campus}-${section.category}`} className="space-y-3">
+              <section
+                key={`${section.campus}-${section.category}`}
+                className="space-y-3"
+              >
                 <div className="flex items-center justify-between gap-3">
                   <div
                     className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-extrabold ${tone.badge}`}
@@ -187,29 +260,29 @@ export default function PhonePage() {
                   {section.departments.map((department) => (
                     <article
                       key={department.id}
-                      className="flex items-center gap-3 rounded-[24px] border border-[#ebe3d8] bg-white px-4 py-4 shadow-[0_12px_28px_rgba(50,58,74,0.05)]"
+                      className="grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-[24px] border border-[#ebe3d8] bg-white px-4 py-4 shadow-[0_12px_28px_rgba(50,58,74,0.05)]"
                     >
                       <div
-                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${tone.icon}`}
+                        className={`flex h-11 w-11 items-center justify-center rounded-full ${tone.icon}`}
                       >
                         <Building2 className="h-5 w-5" />
                       </div>
 
-                      <div className="min-w-0 flex-1">
+                      <div className="min-w-0">
                         <h2 className="truncate text-[16px] font-extrabold tracking-[-0.02em] text-[#2a3550]">
                           {department.name}
                         </h2>
                         <p className="mt-1 text-sm font-bold text-[#536076]">
                           {department.phone}
                         </p>
-                        <p className="mt-1 text-xs leading-5 text-[#6d7789]">
+                        <p className="mt-1 break-keep text-xs leading-5 text-[#6d7789]">
                           {department.description}
                         </p>
                       </div>
 
                       <a
                         href={createTelHref(department.phone)}
-                        className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#67cfad] px-4 py-2 text-xs font-extrabold text-white transition hover:bg-[#57c09d]"
+                        className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#67cfad] px-4 py-2 text-xs font-extrabold whitespace-nowrap text-white transition hover:bg-[#57c09d]"
                         aria-label={`${department.name} 전화걸기 ${department.phone}`}
                       >
                         <PhoneCall className="h-4 w-4" />
@@ -229,12 +302,12 @@ export default function PhonePage() {
             <h2 className="mt-4 text-lg font-extrabold text-[#27324b]">
               검색 결과가 없습니다
             </h2>
-            <p className="mt-2 text-sm leading-6 text-[#6d7789]">
+            <p className="mt-2 break-keep text-sm leading-6 text-[#6d7789]">
               부서명, 전화번호, 카테고리 기준으로 다시 검색해보세요.
             </p>
           </div>
         )}
       </section>
-    </div>
+    </main>
   );
 }
