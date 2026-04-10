@@ -838,7 +838,7 @@ export default function MapPage() {
 
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#fff7ef_0%,_#f8efe6_44%,_#f3ece3_100%)] text-slate-900">
       <div className="mx-auto w-full max-w-[430px] px-4 py-4">
-        <header className="overflow-hidden rounded-[32px] bg-gradient-to-r from-[#efb58f] via-[#a3c7ec] to-[#a9e2c7] p-4 shadow-[0_22px_55px_rgba(120,92,60,0.14)] sm:p-7">22px_55px_rgba(120,92,60,0.14)] sm:p-7">
+        <header className="overflow-hidden rounded-[32px] bg-gradient-to-r from-[#efb58f] via-[#a3c7ec] to-[#a9e2c7] p-4 shadow-[0_22px_55px_rgba(120,92,60,0.14)] sm:p-7">
    
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
