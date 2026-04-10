@@ -37,6 +37,39 @@ function createRawBounds(buildings, padding) {
 }
 
 const CAMPUS_BOUNDS = createRawBounds(buildingData, campusMapData.boundsPadding);
+const ALL_BUILDING_TAG = "전체";
+const BUILDING_TAG_OPTIONS = [
+  ALL_BUILDING_TAG,
+  ...new Set(buildingData.map((building) => building.tag)),
+];
+const MOBILE_PANEL_TABS = [
+  { id: "selected", label: "선택 건물", icon: Building2 },
+  { id: "list", label: "건물 목록", icon: MapPinned },
+  { id: "source", label: "데이터 기준", icon: Info },
+];
+
+function matchesSearch(building, normalizedSearchTerm) {
+  if (!normalizedSearchTerm) {
+    return true;
+  }
+
+  const searchableText = [
+    building.name,
+    building.shortName,
+    building.tag,
+    building.summary,
+    building.description,
+    building.officialGuide,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return searchableText.includes(normalizedSearchTerm);
+}
+
+function matchesTag(building, activeTag) {
+  return activeTag === ALL_BUILDING_TAG || building.tag === activeTag;
+}
 
 function clampCoordinate(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -233,6 +266,9 @@ function SearchBar({
   onChange,
   onClear,
   onSubmit,
+  activeTag,
+  onTagChange,
+  tagOptions,
   filteredCount,
   totalCount,
 }) {
@@ -273,6 +309,39 @@ function SearchBar({
             <X className="h-4 w-4" />
           </button>
         ) : null}
+      </div>
+
+      <div className="mt-4">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            Category Filter
+          </p>
+          <p className="text-xs font-medium text-slate-500">
+            {activeTag === ALL_BUILDING_TAG ? "전체" : activeTag}
+          </p>
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {tagOptions.map((tag) => {
+            const isActive = activeTag === tag;
+
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => onTagChange(tag)}
+                aria-pressed={isActive}
+                className={`shrink-0 rounded-full px-3 py-2 text-xs font-semibold transition ${
+                  isActive
+                    ? "bg-slate-900 text-white shadow-[0_10px_20px_rgba(15,23,42,0.14)]"
+                    : "bg-[#f6efe6] text-slate-600 hover:bg-[#efe4d4]"
+                }`}
+              >
+                {tag}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </form>
   );
@@ -476,6 +545,36 @@ function SourceCard() {
   );
 }
 
+function MobilePanelTabs({ activeTab, onChange }) {
+  return (
+    <section className={`${CARD_CLASS} p-2`}>
+      <div className="grid grid-cols-3 gap-2">
+        {MOBILE_PANEL_TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onChange(tab.id)}
+              aria-pressed={isActive}
+              className={`flex items-center justify-center gap-2 rounded-[20px] px-3 py-3 text-xs font-semibold transition ${
+                isActive
+                  ? "bg-slate-900 text-white shadow-[0_12px_24px_rgba(15,23,42,0.18)]"
+                  : "bg-[#faf3ea] text-slate-500 hover:bg-[#f2e8db]"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function MapPage() {
   const mapElementRef = useRef(null);
   const mapRef = useRef(null);
@@ -489,27 +588,18 @@ export default function MapPage() {
   const [isLocating, setIsLocating] = useState(false);
   const [mapError, setMapError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTag, setActiveTag] = useState(ALL_BUILDING_TAG);
+  const [mobilePanelTab, setMobilePanelTab] = useState(MOBILE_PANEL_TABS[0].id);
   const [selectedBuildingId, setSelectedBuildingId] = useState(
     buildingData[0]?.id ?? null,
   );
 
   const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-  const filteredBuildings = normalizedSearchTerm
-    ? buildingData.filter((building) => {
-        const searchableText = [
-          building.name,
-          building.shortName,
-          building.tag,
-          building.summary,
-          building.description,
-          building.officialGuide,
-        ]
-          .join(" ")
-          .toLowerCase();
-
-        return searchableText.includes(normalizedSearchTerm);
-      })
-    : buildingData;
+  const filteredBuildings = buildingData.filter(
+    (building) =>
+      matchesTag(building, activeTag) &&
+      matchesSearch(building, normalizedSearchTerm),
+  );
 
   const resolvedSelectedBuildingId = filteredBuildings.some(
     (building) => building.id === selectedBuildingId,
@@ -530,13 +620,19 @@ export default function MapPage() {
     mapRef.current.panTo(createLatLng(kakaoRef.current, building.lat, building.lng));
   }
 
-  function selectBuilding(building, { pan = true } = {}) {
+  function selectBuilding(building, { pan = true, revealOnMobile = true } = {}) {
     if (!building) {
       return;
     }
 
     setSelectedBuildingId(building.id);
     setMapError("");
+
+    // 모바일에서는 카드가 길게 누적되기 쉬워서,
+    // 사용자가 건물을 선택하면 상세 패널 탭으로 자연스럽게 이동시킵니다.
+    if (revealOnMobile) {
+      setMobilePanelTab("selected");
+    }
 
     if (pan) {
       panToBuilding(building);
@@ -739,9 +835,11 @@ export default function MapPage() {
   }
 
   return (
-    <main className="bg-[radial-gradient(circle_at_top,_#fff7ef_0%,_#f8efe6_44%,_#f3ece3_100%)] text-slate-900">
-      <div className="w-full px-4 py-4">
-        <header className="overflow-hidden rounded-[32px] bg-gradient-to-r from-[#efb58f] via-[#a3c7ec] to-[#a9e2c7] p-5 shadow-[0_22px_55px_rgba(120,92,60,0.14)] sm:p-7">
+
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#fff7ef_0%,_#f8efe6_44%,_#f3ece3_100%)] text-slate-900">
+      <div className="mx-auto w-full max-w-[430px] px-4 py-4">
+        <header className="overflow-hidden rounded-[32px] bg-gradient-to-r from-[#efb58f] via-[#a3c7ec] to-[#a9e2c7] p-4 shadow-[0_22px_55px_rgba(120,92,60,0.14)] sm:p-7">22px_55px_rgba(120,92,60,0.14)] sm:p-7">
+   
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/85 px-3 py-2 text-xs font-semibold text-slate-700">
@@ -749,15 +847,19 @@ export default function MapPage() {
                 모바일 / PC 반응형 캠퍼스 지도
               </div>
 
-              <h1 className="mt-4 break-keep text-3xl font-bold text-white sm:text-4xl">
+              <h1 className="mt-4 break-keep text-[30px] font-bold text-white sm:text-4xl">
                 {campusMapData.campusName}
               </h1>
 
-              <p className="mt-3 max-w-3xl break-keep text-sm leading-7 text-white/90 sm:text-base">
+              <p className="mt-3 break-keep text-sm leading-6 text-white/90 sm:hidden">
+                수원캠퍼스 주요 건물 위치와 설명을 빠르게 확인할 수 있는 지도입니다.
+              </p>
+
+              <p className="mt-3 hidden max-w-3xl break-keep text-sm leading-7 text-white/90 sm:block sm:text-base">
                 {campusMapData.description}
               </p>
 
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap gap-2 sm:mt-5">
                 <span className="rounded-full bg-white/85 px-3 py-1.5 text-xs font-semibold text-slate-700">
                   건물 {buildingData.length}곳
                 </span>
@@ -768,9 +870,18 @@ export default function MapPage() {
                   실제 장소 좌표 기준
                 </span>
               </div>
+
+              <div className="mt-4 rounded-[22px] bg-white/18 px-4 py-3 backdrop-blur sm:hidden">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80">
+                  Campus Info
+                </p>
+                <p className="mt-2 break-keep text-sm leading-6 text-white/90">
+                  {campusMapData.address}
+                </p>
+              </div>
             </div>
 
-            <div className="w-full max-w-sm rounded-[26px] bg-white/18 p-4 backdrop-blur md:p-5">
+            <div className="hidden w-full max-w-sm rounded-[26px] bg-white/18 p-4 backdrop-blur md:p-5 lg:block">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/90">
                 Campus Info
               </p>
@@ -800,6 +911,9 @@ export default function MapPage() {
               onChange={setSearchTerm}
               onClear={() => setSearchTerm("")}
               onSubmit={handleSearchSubmit}
+              activeTag={activeTag}
+              onTagChange={setActiveTag}
+              tagOptions={BUILDING_TAG_OPTIONS}
               filteredCount={filteredBuildings.length}
               totalCount={buildingData.length}
             />
@@ -815,24 +929,36 @@ export default function MapPage() {
                   </p>
                 </div>
 
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#f6efe6] px-3 py-2 text-xs font-semibold text-slate-600">
-                  <MapPin className="h-3.5 w-3.5 text-[#ee8f5f]" />
-                  선택 건물 {activeBuilding?.shortName ?? "없음"}
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-[#f6efe6] px-3 py-2 text-xs font-semibold text-slate-600">
+                    <MapPin className="h-3.5 w-3.5 text-[#ee8f5f]" />
+                    선택 건물 {activeBuilding?.shortName ?? "없음"}
+                  </div>
+                  <div className="inline-flex items-center gap-2 rounded-full bg-[#edf4ff] px-3 py-2 text-xs font-semibold text-slate-600">
+                    <Building2 className="h-3.5 w-3.5 text-[#3b82f6]" />
+                    필터 {activeTag}
+                  </div>
                 </div>
               </div>
 
               <div className="relative mt-4 overflow-hidden rounded-[26px] border border-[#d7e5f2] bg-[#dbe8f4]">
                 <div
                   ref={mapElementRef}
-                  className="h-[440px] w-full bg-[#dbe8f4] sm:h-[560px] lg:h-[720px]"
+                  className="h-[46svh] min-h-[330px] w-full max-h-[540px] bg-[#dbe8f4] sm:h-[560px] sm:max-h-none lg:h-[720px]"
                   aria-label="경기대학교 수원캠퍼스 지도"
                 />
 
-                <div className="pointer-events-none absolute left-4 top-4">
-                  <div className="rounded-full border border-white/80 bg-white/92 px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm">
+                <div className="pointer-events-none absolute left-4 top-4 max-w-[240px]">
+                  <div className="rounded-[18px] border border-white/80 bg-white/92 px-3 py-2 text-xs font-semibold leading-5 text-slate-700 shadow-sm">
                     좌표 불일치 문제를 줄이기 위해 실제 장소 좌표를 반영했습니다.
                   </div>
                 </div>
+
+                {filteredBuildings.length === 0 ? (
+                  <div className="pointer-events-none absolute inset-x-4 top-20 rounded-[20px] border border-[#f3d6cb] bg-white/95 px-4 py-3 text-sm font-medium leading-6 text-slate-600 shadow-[0_14px_26px_rgba(120,92,60,0.12)]">
+                    현재 검색 조건과 일치하는 건물이 없습니다. 검색어나 태그를 다시 선택해보세요.
+                  </div>
+                ) : null}
 
                 <div className="absolute bottom-4 right-4 z-10">
                   <button
@@ -862,18 +988,32 @@ export default function MapPage() {
               ) : null}
             </div>
 
-            <div className="space-y-5 lg:hidden">
-              <SelectedBuildingCard
-                building={activeBuilding}
-                onLocate={(building) => selectBuilding(building)}
+            <div className="space-y-4 lg:hidden">
+              <MobilePanelTabs
+                activeTab={mobilePanelTab}
+                onChange={setMobilePanelTab}
               />
-              <BuildingListCard
-                buildings={filteredBuildings}
-                selectedBuildingId={resolvedSelectedBuildingId}
-                onSelect={(building) => selectBuilding(building)}
-                isSearching={Boolean(normalizedSearchTerm)}
-              />
-              <SourceCard />
+
+              {mobilePanelTab === "selected" ? (
+                <SelectedBuildingCard
+                  building={activeBuilding}
+                  onLocate={(building) => selectBuilding(building)}
+                />
+              ) : null}
+
+              {mobilePanelTab === "list" ? (
+                <BuildingListCard
+                  buildings={filteredBuildings}
+                  selectedBuildingId={resolvedSelectedBuildingId}
+                  onSelect={(building) => selectBuilding(building)}
+                  isSearching={
+                    Boolean(normalizedSearchTerm) ||
+                    activeTag !== ALL_BUILDING_TAG
+                  }
+                />
+              ) : null}
+
+              {mobilePanelTab === "source" ? <SourceCard /> : null}
             </div>
           </section>
 
@@ -886,7 +1026,9 @@ export default function MapPage() {
               buildings={filteredBuildings}
               selectedBuildingId={resolvedSelectedBuildingId}
               onSelect={(building) => selectBuilding(building)}
-              isSearching={Boolean(normalizedSearchTerm)}
+              isSearching={
+                Boolean(normalizedSearchTerm) || activeTag !== ALL_BUILDING_TAG
+              }
             />
             <SourceCard />
           </aside>
