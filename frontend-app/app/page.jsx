@@ -58,7 +58,7 @@ export default function Home() {
 
   // h-[calc(100vh-136px)] matches viewport height minus Header(56px) and BottomNav(80px padding area approx)
   return (
-    <div className="flex h-[calc(100vh-136px)] flex-col bg-gray-100">
+    <div className="flex h-[calc(100vh-136px)] flex-col bg-[#C6C9D4]">
       
       {/* 채팅 메시지가 출력되는 스크롤 영역 */}
       <div 
@@ -71,14 +71,14 @@ export default function Home() {
       </div>
 
       {/* 하단 영역 (Quick Actions + Chat Input) */}
-      <div className="w-full bg-black border-t border-gray-800 flex flex-col pt-2 shrink-0">
+      <div className="relative w-full bg-[#003876] border-t border-[#003876] flex flex-col pt-2 shrink-0">
         {/* 자주 묻는 질문 (Quick Actions) 버튼 그룹 */}
         <div className="flex gap-2 px-4 pb-2 overflow-x-auto scrollbar-hide items-center">
           {quickActions.map((action, idx) => (
             <button
               key={idx}
               onClick={() => handleSendMessage(action.query)}
-              className="flex items-center gap-1.5 whitespace-nowrap bg-[#1E1E1E] text-gray-300 py-1.5 px-3 rounded-full text-xs font-medium border border-gray-700 hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-1.5 whitespace-nowrap bg-white text-[#003876] py-1.5 px-3 rounded-full text-xs font-medium border border-transparent hover:bg-[#003876] hover:text-white hover:border-white active:bg-[#003876] active:text-white active:border-white transition-colors"
             >
               {action.icon}
               {action.label}
@@ -88,6 +88,9 @@ export default function Home() {
 
         {/* 텍스트 입력창 */}
         <ChatInput onSendMessage={handleSendMessage} />
+
+        {/* 하단 padding-bottom에 의한 빈 공간을 덮어주기 위한 가상 요소 */}
+        <div className="absolute top-full left-0 right-0 h-[100px] bg-[#003876]" />
       </div>
     </div>
   );
