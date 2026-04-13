@@ -835,15 +835,15 @@ export default function MapPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#d7deea_0%,#c6c9d4_100%)] text-slate-900">
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-        <header className="overflow-hidden rounded-[32px] bg-gradient-to-r from-[#dae2ef] via-[#d1d9e6] to-[#c3d0e2] p-4 shadow-[0_22px_55px_rgba(0,56,118,0.08)] sm:p-7">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#003876]">
-                <MapPinned className="h-3.5 w-3.5 text-[#003876]" />
-                모바일 / PC 반응형 캠퍼스 지도
-              </div>
+              <main className="min-h-screen bg-[linear-gradient(180deg,#d7deea_0%,#c6c9d4_100%)] text-slate-900">
+                <div className="mx-auto w-full max-w-[430px] px-4 py-4">
+                  <header className="overflow-hidden rounded-[32px] bg-gradient-to-r from-[#dae2ef] via-[#d1d9e6] to-[#c3d0e2] p-4 shadow-[0_22px_55px_rgba(0,56,118,0.08)] sm:p-7">
+                        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                          <div className="min-w-0">
+                            <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#003876]">
+                              <MapPinned className="h-3.5 w-3.5 text-[#003876]" />
+                          모바일 / PC 반응형 캠퍼스 지도
+                            </div>
 
               <h1 className="mt-4 break-keep text-[30px] font-bold text-[#173050] sm:text-4xl">
                 {campusMapData.campusName}

@@ -13,14 +13,25 @@ export default function RootLayout({ children }) {
       <body
         style={{
           margin: 0,
-          paddingBottom: "80px",
           backgroundColor: "black",
           color: "white",
         }}
       >
-        <Header />
-        {children}
-        <BottomNav />
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "430px",
+            minHeight: "100vh",
+            margin: "0 auto",
+            position: "relative",
+            paddingBottom: "80px",
+            backgroundColor: "black",
+          }}
+        >
+          <Header />
+          {children}
+          <BottomNav />
+        </div>
       </body>
     </html>
   );
