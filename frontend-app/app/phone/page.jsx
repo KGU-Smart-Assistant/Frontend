@@ -13,37 +13,47 @@ const normalizeText = (value) =>
     .replace(/\s+/g, "");
 
 const createTelHref = (phone) => `tel:${String(phone).replace(/[^\d+]/g, "")}`;
+const BUTTON_BASE_CLASS =
+  "rounded-full border font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#003876] focus-visible:ring-offset-2";
+const BUTTON_ACTIVE_CLASS =
+  "border-[#003876] bg-[#003876] text-white shadow-[0_12px_24px_rgba(0,56,118,0.18)]";
+const BUTTON_IDLE_CLASS =
+  "border-[#d7dfeb] bg-white text-[#003876] hover:border-[#95a8c7]";
+const PHONE_BUTTON_CLASS =
+  "inline-flex min-h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap px-4 py-2 text-xs";
+const ICON_BUTTON_CLASS =
+  "inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#d7dfeb] bg-white text-[#607290] transition hover:border-[#95a8c7] active:border-[#003876] active:bg-[#003876] active:text-white";
 
 const categoryToneMap = {
   대표번호: {
-    badge: "border-[#f4cfb3] bg-[#fff1e5] text-[#d47d48]",
-    icon: "bg-[#dce9ff] text-[#6c97d4]",
+    badge: "border-[#F36F21] bg-[#F9C1B0] text-[#9b4a1f]",
+    icon: "bg-[#F9C1B0] text-[#F36F21]",
   },
   행정: {
-    badge: "border-[#cfe0ff] bg-[#edf4ff] text-[#5c80ba]",
-    icon: "bg-[#dce9ff] text-[#6c97d4]",
+    badge: "border-[#003876] bg-[#C6C9D4] text-[#003876]",
+    icon: "bg-[#C6C9D4] text-[#003876]",
   },
   학사: {
-    badge: "border-[#cde6d8] bg-[#eef7f1] text-[#4d8b72]",
-    icon: "bg-[#dcefe7] text-[#4d8b72]",
+    badge: "border-[#ffb400] bg-[#FFDBAE] text-[#8a6400]",
+    icon: "bg-[#FFDBAE] text-[#b57d00]",
   },
   입학: {
-    badge: "border-[#f4d8b7] bg-[#fff7ec] text-[#c28743]",
-    icon: "bg-[#fff1da] text-[#c28743]",
+    badge: "border-[#F36F21] bg-[#F9C1B0] text-[#9b4a1f]",
+    icon: "bg-[#F9C1B0] text-[#F36F21]",
   },
   학생지원: {
-    badge: "border-[#d8d5f4] bg-[#f5f3ff] text-[#7067b5]",
-    icon: "bg-[#ece8ff] text-[#7067b5]",
+    badge: "border-[#00AB39] bg-[#B7DCBC] text-[#0c6d2d]",
+    icon: "bg-[#B7DCBC] text-[#00AB39]",
   },
   시설관리: {
-    badge: "border-[#d3e5da] bg-[#edf7f1] text-[#4a8a70]",
-    icon: "bg-[#dcefe7] text-[#4a8a70]",
+    badge: "border-[#003876] bg-[#C6C9D4] text-[#003876]",
+    icon: "bg-[#C6C9D4] text-[#003876]",
   },
 };
 
 const defaultTone = {
-  badge: "border-[#d9dee6] bg-[#f4f7fa] text-[#64748b]",
-  icon: "bg-[#e7eef6] text-[#64748b]",
+  badge: "border-[#003876] bg-[#C6C9D4] text-[#003876]",
+  icon: "bg-[#C6C9D4] text-[#003876]",
 };
 
 export default function PhonePage() {
@@ -119,10 +129,10 @@ export default function PhonePage() {
   );
 
   return (
-    <main className="min-h-[calc(100dvh-136px)] bg-[#f7f2ea] px-4 py-5 text-[#27324b]">
-      <section className="rounded-[28px] border border-[#eadfd2] bg-[#fffaf4] p-4 shadow-[0_18px_40px_rgba(42,53,80,0.06)]">
+    <main className="min-h-[calc(100dvh-136px)] bg-[#C6C9D4] px-4 py-5 text-[#27324b]">
+      <section className="rounded-[28px] border border-[#d8dce6] bg-[#f9fbff] p-4 shadow-[0_18px_40px_rgba(42,53,80,0.08)]">
         <div>
-          <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[#d6814d]">
+          <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[#F36F21]">
             Campus Contacts
           </p>
           <h1 className="mt-2 text-[26px] font-extrabold tracking-[-0.05em] text-[#27324b]">
@@ -133,7 +143,7 @@ export default function PhonePage() {
           </p>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-2 rounded-full bg-[#efe8de] p-1.5">
+        <div className="mt-5 grid grid-cols-2 gap-2 rounded-full bg-[#aeb9ce] p-1.5">
           {campusTabs.map((tab) => {
             const isActive = tab.campus === activeCampus;
 
@@ -143,10 +153,10 @@ export default function PhonePage() {
                 type="button"
                 onClick={() => setActiveCampus(tab.campus)}
                 aria-pressed={isActive}
-                className={`rounded-full px-4 py-3 text-sm font-extrabold transition ${
+                className={`${BUTTON_BASE_CLASS} px-4 py-3 text-sm ${
                   isActive
-                    ? "bg-[#f4a15e] text-white shadow-[0_12px_24px_rgba(244,161,94,0.22)]"
-                    : "bg-[#f7f1e7] text-[#7a8597]"
+                    ? BUTTON_ACTIVE_CLASS
+                    : BUTTON_IDLE_CLASS
                 }`}
               >
                 {tab.label}
@@ -156,9 +166,9 @@ export default function PhonePage() {
         </div>
 
         {currentCampusInfo ? (
-          <div className="mt-4 rounded-[22px] border border-[#ece1d3] bg-white/70 p-4">
+          <div className="mt-4 rounded-[22px] border border-[#c2cedf] bg-[#eef3fb] p-4">
             <div className="flex items-start gap-2 text-sm text-[#526076]">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#d6814d]" />
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#F36F21]" />
               <p className="font-semibold leading-5">{currentCampusInfo.address}</p>
             </div>
 
@@ -167,21 +177,21 @@ export default function PhonePage() {
             </p>
 
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <div className="rounded-[18px] bg-[#f8f2ea] px-3 py-3">
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#9a8671]">
+              <div className="rounded-[18px] border border-[#ffb400]/35 bg-[#FFDBAE] px-3 py-3">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#8a6400]">
                   Category
                 </p>
-                <p className="mt-1 text-lg font-extrabold text-[#374151]">
+                <p className="mt-1 text-lg font-extrabold text-[#6f5200]">
                   {campusSections.length}개
                 </p>
               </div>
-              <div className="rounded-[18px] bg-[#edf6eb] px-3 py-3">
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#5d8a75]">
+              <div className="rounded-[18px] border border-[#00AB39]/30 bg-[#B7DCBC] px-3 py-3">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#0c6d2d]">
                   Contacts
                 </p>
-                <p className="mt-1 text-lg font-extrabold text-[#2f6d59]">
+                <p className="mt-1 text-lg font-extrabold text-[#0c6d2d]">
                   {visibleCount}
-                  <span className="ml-1 text-xs font-bold text-[#6c8178]">
+                  <span className="ml-1 text-xs font-bold text-[#476954]">
                     / {campusContactCount}
                   </span>
                 </p>
@@ -191,20 +201,20 @@ export default function PhonePage() {
         ) : null}
 
         <div className="relative mt-5">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#90a0b2]" />
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#4f6486]" />
           <input
             type="search"
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
             placeholder="부서명 또는 전화번호를 검색하세요"
-            className="h-12 w-full rounded-[20px] border border-[#e4d9cb] bg-white pl-11 pr-11 text-sm text-[#27324b] outline-none transition placeholder:text-[#99a3b2] focus:border-[#efaa6f] focus:ring-4 focus:ring-[#f7d7bb]"
+            className="h-12 w-full rounded-[20px] border border-[#d5dce7] bg-white pl-11 pr-11 text-sm text-[#27324b] outline-none transition placeholder:text-[#99a3b2] focus:border-[#003876] focus:ring-4 focus:ring-[#c7d8ee]"
           />
           {keyword ? (
             <button
               type="button"
               onClick={() => setKeyword("")}
               aria-label="검색어 지우기"
-              className="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#8995a7] transition hover:bg-[#f6efe6]"
+              className={`absolute right-3 top-1/2 -translate-y-1/2 ${ICON_BUTTON_CLASS}`}
             >
               <X className="h-4 w-4" />
             </button>
@@ -221,10 +231,10 @@ export default function PhonePage() {
                 type="button"
                 onClick={() => setActiveCategory(category)}
                 aria-pressed={isActive}
-                className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition ${
+                className={`${BUTTON_BASE_CLASS} shrink-0 px-4 py-2 text-xs ${
                   isActive
-                    ? "border-[#efaa6f] bg-[#fef0e4] text-[#c87441]"
-                    : "border-[#e7dbcc] bg-white text-[#7b8798]"
+                    ? BUTTON_ACTIVE_CLASS
+                    : BUTTON_IDLE_CLASS
                 }`}
               >
                 {category}
@@ -242,7 +252,7 @@ export default function PhonePage() {
             return (
               <section
                 key={`${section.campus}-${section.category}`}
-                className="space-y-3"
+                className="space-y-3 rounded-[28px] border border-[#b5c2d8] bg-[#b5c0d4] p-4"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div
@@ -260,7 +270,7 @@ export default function PhonePage() {
                   {section.departments.map((department) => (
                     <article
                       key={department.id}
-                      className="grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-[24px] border border-[#ebe3d8] bg-white px-4 py-4 shadow-[0_12px_28px_rgba(50,58,74,0.05)]"
+                      className="grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-[24px] border border-[#dce2eb] bg-white px-4 py-4 shadow-[0_12px_28px_rgba(50,58,74,0.05)]"
                     >
                       <div
                         className={`flex h-11 w-11 items-center justify-center rounded-full ${tone.icon}`}
@@ -282,7 +292,7 @@ export default function PhonePage() {
 
                       <a
                         href={createTelHref(department.phone)}
-                        className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#67cfad] px-4 py-2 text-xs font-extrabold whitespace-nowrap text-white transition hover:bg-[#57c09d]"
+                        className={`${BUTTON_BASE_CLASS} ${PHONE_BUTTON_CLASS} ${BUTTON_IDLE_CLASS} visited:text-[#003876] active:border-[#003876] active:bg-[#003876] active:text-white`}
                         aria-label={`${department.name} 전화걸기 ${department.phone}`}
                       >
                         <PhoneCall className="h-4 w-4" />
@@ -295,8 +305,8 @@ export default function PhonePage() {
             );
           })
         ) : (
-          <div className="rounded-[28px] border border-dashed border-[#dbd0c3] bg-white/90 px-6 py-10 text-center shadow-[0_12px_28px_rgba(50,58,74,0.05)]">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#f5ebe0] text-[#d18256]">
+          <div className="rounded-[28px] border border-dashed border-[#d0d6e3] bg-white/90 px-6 py-10 text-center shadow-[0_12px_28px_rgba(50,58,74,0.05)]">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#C6C9D4] text-[#003876]">
               <Search className="h-5 w-5" />
             </div>
             <h2 className="mt-4 text-lg font-extrabold text-[#27324b]">
