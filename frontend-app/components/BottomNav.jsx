@@ -14,11 +14,11 @@ export default function BottomNav() {
         display: "flex",
         justifyContent: "space-around",
         padding: "16px",
-        backgroundColor: "#111",
+        backgroundColor: "#003876", // 여기 변경
         borderTop: "1px solid #333",
         zIndex: 100,
-      }}
-    >
+  }}
+>
       <Link href="/" style={{ color: "white", textDecoration: "none" }}>
         홈
       </Link>
