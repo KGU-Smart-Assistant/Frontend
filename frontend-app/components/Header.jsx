@@ -2,20 +2,23 @@
 
 import { useState } from "react";
 import { Globe } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Header() {
   const [isLangOpen, setIsLangOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("한국어");
+  const { currentLang, setCurrentLang, t } = useLanguage();
 
   const languages = [
-    { code: "ko", label: "한국어" },
+    { code: "kr", label: "한국어" },
     { code: "en", label: "English" },
     { code: "zh", label: "中文" },
     { code: "ja", label: "日本語" },
   ];
 
-  const selectLang = (label) => {
-    setCurrentLang(label);
+  const currentLangLabel = languages.find(l => l.code === currentLang)?.label || "한국어";
+
+  const selectLang = (code) => {
+    setCurrentLang(code);
     setIsLangOpen(false);
   };
 
@@ -34,7 +37,7 @@ export default function Header() {
           className="flex items-center gap-1.5 rounded-lg border border-white/30 px-3 py-1.5 text-xs text-white hover:bg-white/10 transition-colors"
         >
           <Globe size={14} />
-          <span className="font-medium">{currentLang}</span>
+          <span className="font-medium">{currentLangLabel}</span>
         </button>
 
         {isLangOpen && (
@@ -51,9 +54,9 @@ export default function Header() {
                 {languages.map((lang) => (
                   <li key={lang.code}>
                     <button
-                      onClick={() => selectLang(lang.label)}
+                      onClick={() => selectLang(lang.code)}
                       className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
-                        currentLang === lang.label 
+                        currentLang === lang.code 
                           ? "font-semibold text-[#003876] bg-blue-50/30" 
                           : "font-medium"
                       }`}

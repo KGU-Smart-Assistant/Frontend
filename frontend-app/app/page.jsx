@@ -1,16 +1,25 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { initialMessages, getMockResponse } from "@/data/mockChatData";
+import { getInitialMessages, getMockResponse } from "@/data/mockChatData";
 import ChatMessage from "@/components/ChatMessage";
 import ChatInput from "@/components/ChatInput";
 import QuickActions from "@/components/QuickActions";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Home() {
+  const { currentLang } = useLanguage();
   // [프론트엔드 테스트용 State] 대화 목록을 관리합니다.
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState(() => getInitialMessages("kr"));
   const scrollRef = useRef(null);
-  const nextMessageIdRef = useRef(initialMessages.length);
+  const nextMessageIdRef = useRef(1); // 초기 메시지가 1개이므로 1부터 시작
+
+  useEffect(() => {
+    // 언어 변경 시 채팅 기록이 초기 메시지뿐이라면, 해당 언어로 갱신
+    if (messages.length <= 1) {
+      setMessages(getInitialMessages(currentLang));
+    }
+  }, [currentLang]);
 
   // 렌더 중 Date.now를 호출하지 않도록, 이벤트마다 순차 ID를 발급합니다.
   const getNextMessageId = () => {
@@ -41,7 +50,12 @@ export default function Home() {
 
     // 2. 가상의 봇 응답 스케줄링 (자연스러운 딜레이를 위해 0.6초 뒤 전송)
     setTimeout(() => {
-      const botResponse = getMockResponse(dataToSend);
+      // API 요청 시 body에 들어갈 데이터 구조를 시뮬레이션
+      const requestBody = {
+        message: dataToSend,
+        language: currentLang
+      };
+      const botResponse = getMockResponse(requestBody);
       const newBotMessage = {
         id: getNextMessageId(),
         sender: "bot",
