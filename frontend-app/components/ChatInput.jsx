@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Send } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // 사용자 입력을 받아 채팅을 전송하는 컴포넌트
 export default function ChatInput({ onSendMessage }) {
+  const { t } = useLanguage();
   // [프론트엔드 상호작용 테스트용 State]
   const [text, setText] = useState("");
 
@@ -29,7 +31,7 @@ export default function ChatInput({ onSendMessage }) {
       {/* 텍스트 입력창. focus시 테두리에 경기대 메인컬러 노출 */}
       <input
         type="text"
-        placeholder="메시지를 입력하세요..."
+        placeholder={t("chatInput.placeholder")}
         className="flex-1 bg-white text-gray-900 placeholder-gray-500 px-4 py-3 rounded-full text-sm outline-none focus:ring-2 focus:ring-white transition-all shadow-inner"
         value={text}
         onChange={(e) => setText(e.target.value)}

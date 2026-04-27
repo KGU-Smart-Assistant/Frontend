@@ -1,11 +1,14 @@
 import { Calendar, Plane, CreditCard } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function QuickActions({ onActionClick }) {
+  const { t } = useLanguage();
+
   // 자주 묻는 질문(Quick Actions) 데이터
   const quickActions = [
-    { label: "학사일정", icon: <Calendar size={14} />, query: "학사일정에 대해 알려주세요.", payload: "QA_1" },
-    { label: "교환학생", icon: <Plane size={14} />, query: "교환학생에 대해서 알려주세요.", payload: "QA_2" },
-    { label: "등록금/장학", icon: <CreditCard size={14} />, query: "등록금 납부 관련해서 알려주세요.", payload: "QA_3" },
+    { label: t("quickActions.academicCalendar"), icon: <Calendar size={14} />, query: t("quickActions.academicCalendar"), payload: "QA_1" },
+    { label: t("quickActions.exchangeStudent"), icon: <Plane size={14} />, query: t("quickActions.exchangeStudent"), payload: "QA_2" },
+    { label: t("quickActions.tuition"), icon: <CreditCard size={14} />, query: t("quickActions.tuition"), payload: "QA_3" },
   ];
 
   return (
