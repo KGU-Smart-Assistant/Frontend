@@ -13,17 +13,17 @@ export const initialMessages = [
 
 // 사용자의 질문(또는 버튼 클릭)에 따라 적절한 목업 응답을 반환하는 함수
 export const getMockResponse = (query) => {
-  if (query.includes("학사일정")) {
+  if (query.includes("학사일정") || query === "QA_1") {
     return {
       reply: "2026학년도 주요 학사일정을 안내해 드리겠습니다.\n\n[1학기]\n- 수강신청: 2월 중순\n- 개강: 3월 첫째 주\n- 중간고사: 4월 셋째 주\n- 기말고사: 6월 셋째 주\n\n자세한 사항은 학교 홈페이지 공지사항을 참고해주세요!",
       intent: "일반"
     };
-  } else if (query.includes("교환학생")) {
+  } else if (query.includes("교환학생") || query === "QA_2") {
     return {
       reply: "교환학생(SEP) 프로그램에 대해 안내해 드립니다. 국제교류처 홈페이지에서 이번 학기 모집 공고 및 지원 자격을 확인하실 수 있습니다.",
       intent: "일반"
     };
-  } else if (query.includes("등록금") || query.includes("장학")) {
+  } else if (query.includes("등록금") || query.includes("장학") || query === "QA_3") {
     return {
       reply: "등록금 납부 및 장학금 관련 안내입니다. 정규 등록 기간은 2월 초 ~ 2월 말이며, 장학금 신청은 한국장학재단 및 종합정보시스템을 통해 진행됩니다.",
       intent: "일반"
