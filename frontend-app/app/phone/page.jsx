@@ -166,171 +166,219 @@ const CATEGORY_COPY = {
 
 const DEPARTMENT_COPY = {
   "suwon-main-switchboard": {
-    name: { kr: "대표번호", en: "Main Operator" },
+    name: { kr: "대표번호", en: "Main Operator", zh: "总机", ja: "代表番号" },
     description: {
       kr: "캠퍼스 대표 연결 및 기본 안내",
       en: "General campus operator and basic guidance.",
+      zh: "校区总机转接及基本咨询。",
+      ja: "キャンパス代表番号への接続と基本案内。",
     },
   },
   "suwon-info-center": {
-    name: { kr: "종합안내센터", en: "Information Center" },
+    name: { kr: "종합안내센터", en: "Information Center", zh: "综合问询中心", ja: "総合案内センター" },
     description: {
       kr: "방문 안내, 위치 문의, 대표 민원 접수",
       en: "Visitor guidance, directions, and general inquiries.",
+      zh: "提供访客引导、位置咨询和一般咨询受理。",
+      ja: "来訪案内、場所の問い合わせ、代表窓口対応。",
     },
   },
   "suwon-general-affairs": {
-    name: { kr: "총무팀", en: "General Affairs Team" },
+    name: { kr: "총무팀", en: "General Affairs Team", zh: "总务组", ja: "総務チーム" },
     description: {
       kr: "총무, 문서, 교내 행정 지원",
       en: "General affairs, documents, and campus administration support.",
+      zh: "负责总务、文书和校内行政支援。",
+      ja: "総務、文書、学内行政支援。",
     },
   },
   "suwon-finance": {
-    name: { kr: "재무회계팀", en: "Finance and Accounting Team" },
+    name: { kr: "재무회계팀", en: "Finance and Accounting Team", zh: "财务会计组", ja: "財務会計チーム" },
     description: {
       kr: "등록금, 회계, 예산 관련 문의",
       en: "Tuition, accounting, and budget-related inquiries.",
+      zh: "注册费、会计和预算相关咨询。",
+      ja: "授業料、会計、予算に関する問い合わせ。",
     },
   },
   "suwon-academic-affairs": {
-    name: { kr: "교무처", en: "Office of Academic Affairs" },
+    name: { kr: "교무처", en: "Office of Academic Affairs", zh: "教务处", ja: "教務処" },
     description: {
       kr: "수업 운영, 학사 일정, 수강 관련 문의",
       en: "Course operations, academic calendar, and registration inquiries.",
+      zh: "课程运营、学事日程和选课相关咨询。",
+      ja: "授業運営、学事日程、履修登録に関する問い合わせ。",
     },
   },
   "suwon-academic-support": {
-    name: { kr: "학사지원팀", en: "Academic Support Team" },
+    name: { kr: "학사지원팀", en: "Academic Support Team", zh: "学事支援组", ja: "学事支援チーム" },
     description: {
       kr: "휴학, 복학, 성적, 졸업 업무 안내",
       en: "Leave of absence, return, grades, and graduation support.",
+      zh: "休学、复学、成绩和毕业手续咨询。",
+      ja: "休学、復学、成績、卒業手続きの案内。",
     },
   },
   "suwon-admissions-office": {
-    name: { kr: "입학처", en: "Admissions Office" },
+    name: { kr: "입학처", en: "Admissions Office", zh: "招生处", ja: "入学処" },
     description: {
       kr: "신입학, 편입학, 전형 일정 안내",
       en: "Freshman, transfer, and admissions schedule guidance.",
+      zh: "新生入学、插班入学和招生日程咨询。",
+      ja: "新入学、編入学、選考日程の案内。",
     },
   },
   "suwon-admissions-center": {
-    name: { kr: "입학상담센터", en: "Admissions Help Center" },
+    name: { kr: "입학상담센터", en: "Admissions Help Center", zh: "招生咨询中心", ja: "入学相談センター" },
     description: {
       kr: "전형별 상담 및 제출서류 문의",
       en: "Application consultations and document submission inquiries.",
+      zh: "各类招生咨询和提交材料相关咨询。",
+      ja: "選考別相談および提出書類に関する問い合わせ。",
     },
   },
   "suwon-student-support": {
-    name: { kr: "학생지원팀", en: "Student Support Team" },
+    name: { kr: "학생지원팀", en: "Student Support Team", zh: "学生支援组", ja: "学生支援チーム" },
     description: {
       kr: "학생 민원, 증명서, 학교생활 전반 문의",
       en: "Student services, certificates, and campus life support.",
+      zh: "学生咨询、证明书和校园生活相关咨询。",
+      ja: "学生相談、証明書、学生生活全般の問い合わせ。",
     },
   },
   "suwon-scholarship": {
-    name: { kr: "장학복지팀", en: "Scholarship and Welfare Team" },
+    name: { kr: "장학복지팀", en: "Scholarship and Welfare Team", zh: "奖学福利组", ja: "奨学福祉チーム" },
     description: {
       kr: "장학금, 복지, 학생 복지제도 안내",
       en: "Scholarships, welfare, and student benefits guidance.",
+      zh: "奖学金、福利和学生福利制度咨询。",
+      ja: "奨学金、福祉、学生福祉制度の案内。",
     },
   },
   "suwon-facility-management": {
-    name: { kr: "시설관리팀", en: "Facilities Management Team" },
+    name: { kr: "시설관리팀", en: "Facilities Management Team", zh: "设施管理组", ja: "施設管理チーム" },
     description: {
       kr: "강의실, 건물, 시설 유지보수 문의",
       en: "Classroom, building, and facility maintenance inquiries.",
+      zh: "教室、建筑和设施维护咨询。",
+      ja: "講義室、建物、施設の維持補修に関する問い合わせ。",
     },
   },
   "suwon-facility-center": {
-    name: { kr: "시설민원센터", en: "Facility Service Center" },
+    name: { kr: "시설민원센터", en: "Facility Service Center", zh: "设施服务中心", ja: "施設相談センター" },
     description: {
       kr: "냉난방, 조명, 설비 민원 접수",
       en: "Heating, cooling, lighting, and equipment service requests.",
+      zh: "制冷供暖、照明和设备问题受理。",
+      ja: "冷暖房、照明、設備に関する相談受付。",
     },
   },
   "seoul-main-switchboard": {
-    name: { kr: "대표번호", en: "Main Operator" },
+    name: { kr: "대표번호", en: "Main Operator", zh: "总机", ja: "代表番号" },
     description: {
       kr: "서울캠퍼스 대표 연결 및 기본 안내",
       en: "Seoul campus operator and basic guidance.",
+      zh: "首尔校区总机转接及基本咨询。",
+      ja: "ソウルキャンパス代表番号への接続と基本案内。",
     },
   },
   "seoul-info-desk": {
-    name: { kr: "캠퍼스안내데스크", en: "Campus Information Desk" },
+    name: { kr: "캠퍼스안내데스크", en: "Campus Information Desk", zh: "校区问询台", ja: "キャンパス案内デスク" },
     description: {
       kr: "방문객 안내 및 주요 부서 연결",
       en: "Visitor guidance and routing to major departments.",
+      zh: "访客引导及主要部门转接。",
+      ja: "来訪者案内および主要部署への取次。",
     },
   },
   "seoul-admin-support": {
-    name: { kr: "행정지원실", en: "Administrative Support Office" },
+    name: { kr: "행정지원실", en: "Administrative Support Office", zh: "行政支援室", ja: "行政支援室" },
     description: {
       kr: "일반 행정, 문서, 교내 지원 업무",
       en: "General administration, documents, and campus support services.",
+      zh: "一般行政、文书和校内支援业务。",
+      ja: "一般行政、文書、学内支援業務。",
     },
   },
   "seoul-human-resources": {
-    name: { kr: "인사총무팀", en: "HR and General Affairs Team" },
+    name: { kr: "인사총무팀", en: "HR and General Affairs Team", zh: "人事总务组", ja: "人事総務チーム" },
     description: {
       kr: "인사, 총무, 교직원 행정 문의",
       en: "Human resources, general affairs, and staff administration inquiries.",
+      zh: "人事、总务和教职员行政咨询。",
+      ja: "人事、総務、教職員行政に関する問い合わせ。",
     },
   },
   "seoul-academic-support": {
-    name: { kr: "교학지원팀", en: "Academic Support Team" },
+    name: { kr: "교학지원팀", en: "Academic Support Team", zh: "教务支援组", ja: "教学支援チーム" },
     description: {
       kr: "학사 운영, 수업, 학적 관련 문의",
       en: "Academic operations, classes, and student record inquiries.",
+      zh: "学事运营、课程和学籍相关咨询。",
+      ja: "学事運営、授業、学籍に関する問い合わせ。",
     },
   },
   "seoul-curriculum": {
-    name: { kr: "교육과정지원실", en: "Curriculum Support Office" },
+    name: { kr: "교육과정지원실", en: "Curriculum Support Office", zh: "课程支援室", ja: "教育課程支援室" },
     description: {
       kr: "교육과정, 이수 체계, 졸업 요건 안내",
       en: "Curriculum, degree path, and graduation requirement guidance.",
+      zh: "课程、修读体系和毕业要求咨询。",
+      ja: "教育課程、履修体系、卒業要件の案内。",
     },
   },
   "seoul-admissions-office": {
-    name: { kr: "입학관리팀", en: "Admissions Management Team" },
+    name: { kr: "입학관리팀", en: "Admissions Management Team", zh: "招生管理组", ja: "入学管理チーム" },
     description: {
       kr: "입학 전형, 원서접수, 일정 문의",
       en: "Admissions process, applications, and schedule inquiries.",
+      zh: "招生选拔、报名和日程咨询。",
+      ja: "入学選考、願書受付、日程に関する問い合わせ。",
     },
   },
   "seoul-transfer-center": {
-    name: { kr: "편입학상담실", en: "Transfer Admissions Desk" },
+    name: { kr: "편입학상담실", en: "Transfer Admissions Desk", zh: "插班入学咨询室", ja: "編入学相談室" },
     description: {
       kr: "편입학, 학사편입, 서류 안내",
       en: "Transfer admissions and required documents guidance.",
+      zh: "插班入学、学士插班和材料咨询。",
+      ja: "編入学、学士編入、書類の案内。",
     },
   },
   "seoul-student-service": {
-    name: { kr: "학생서비스센터", en: "Student Service Center" },
+    name: { kr: "학생서비스센터", en: "Student Service Center", zh: "学生服务中心", ja: "学生サービスセンター" },
     description: {
       kr: "학생 민원, 휴복학, 제증명 문의",
       en: "Student services, leave of absence, and certificate inquiries.",
+      zh: "学生咨询、休复学和证明书相关咨询。",
+      ja: "学生相談、休復学、各種証明に関する問い合わせ。",
     },
   },
   "seoul-scholarship-center": {
-    name: { kr: "장학지원센터", en: "Scholarship Support Center" },
+    name: { kr: "장학지원센터", en: "Scholarship Support Center", zh: "奖学支援中心", ja: "奨学支援センター" },
     description: {
       kr: "장학 선발, 국가장학, 생활지원 상담",
       en: "Scholarship selection, national scholarships, and support counseling.",
+      zh: "奖学选拔、国家奖学和生活支援咨询。",
+      ja: "奨学選抜、国家奨学、生活支援の相談。",
     },
   },
   "seoul-facility-support": {
-    name: { kr: "시설지원팀", en: "Facilities Support Team" },
+    name: { kr: "시설지원팀", en: "Facilities Support Team", zh: "设施支援组", ja: "施設支援チーム" },
     description: {
       kr: "건물, 공간, 강의실 시설 유지보수",
       en: "Building, space, and classroom maintenance support.",
+      zh: "建筑、空间和教室设施维护。",
+      ja: "建物、スペース、講義室施設の維持補修。",
     },
   },
   "seoul-control-room": {
-    name: { kr: "통합관제실", en: "Integrated Control Room" },
+    name: { kr: "통합관제실", en: "Integrated Control Room", zh: "综合管制室", ja: "統合管制室" },
     description: {
       kr: "보안, 출입, 긴급 시설 상황 접수",
       en: "Security, access control, and emergency facility support.",
+      zh: "安保、出入和紧急设施情况受理。",
+      ja: "警備、出入り、緊急施設状況の受付。",
     },
   },
 };
