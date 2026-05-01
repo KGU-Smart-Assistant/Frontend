@@ -1,16 +1,20 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import kr from "@/localisation_kr/mainpage.json";
-import en from "@/localisation_en/mainpage.json";
-import zh from "@/localisation_zh/mainpage.json";
-import ja from "@/localisation_ja/mainpage.json";
+import krMain from "@/localisation_kr/mainpage.json";
+import enMain from "@/localisation_en/mainpage.json";
+import zhMain from "@/localisation_zh/mainpage.json";
+import jaMain from "@/localisation_ja/mainpage.json";
+import krPhone from "@/localisation_kr/phone.json";
+import enPhone from "@/localisation_en/phone.json";
+import zhPhone from "@/localisation_zh/phone.json";
+import jaPhone from "@/localisation_ja/phone.json";
 
 const dictionaries = {
-  kr,
-  en,
-  zh,
-  ja
+  kr: { ...krMain, ...krPhone },
+  en: { ...enMain, ...enPhone },
+  zh: { ...zhMain, ...zhPhone },
+  ja: { ...jaMain, ...jaPhone }
 };
 
 const LanguageContext = createContext();
@@ -29,9 +33,9 @@ export function LanguageProvider({ children }) {
   const [currentLang, setCurrentLang] = useState(getInitialLanguage); // 기본 언어: 한국어(kr)
 
   // 다국어 번역을 위한 t 함수
-  const t = (keyPath) => {
+  const t = (keyPath, language = currentLang) => {
     const keys = keyPath.split(".");
-    let current = dictionaries[currentLang];
+    let current = dictionaries[language] ?? dictionaries[currentLang];
     for (const key of keys) {
       if (current && current[key] !== undefined) {
         current = current[key];
