@@ -5,12 +5,16 @@ import kr from "@/localisation_kr/mainpage.json";
 import en from "@/localisation_en/mainpage.json";
 import zh from "@/localisation_zh/mainpage.json";
 import ja from "@/localisation_ja/mainpage.json";
+import map_kr from "@/localisation_kr/mappage.json";
+import map_en from "@/localisation_en/mappage.json";
+import map_ja from "@/localisation_ja/mappage.json";
+import map_zh from "@/localisation_zh/mappage.json";
 
 const dictionaries = {
-  kr,
-  en,
-  zh,
-  ja
+  kr: { ...kr, ...map_kr },
+  en: { ...en, ...map_en },
+  zh: { ...zh, ...map_zh },
+  ja: { ...ja, ...map_ja }
 };
 
 const LanguageContext = createContext();
