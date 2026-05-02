@@ -1,18 +1,31 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Building2, MapPin, PhoneCall, Search, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
+import { useLanguage } from "@/contexts/LanguageContext";
 import { campusTabs, phoneDirectory } from "@/data/phoneDirectory";
 
-const ALL_CATEGORY = "전체";
+const ALL_CATEGORY = "all";
+const SUPPORTED_LANGUAGES = ["kr", "en", "zh", "ja"];
 
-const normalizeText = (value) =>
-  String(value ?? "")
-    .toLowerCase()
-    .replace(/\s+/g, "");
+const CATEGORY_KEY_BY_NAME = {
+  대표번호: "mainLine",
+  행정: "administration",
+  학사: "academics",
+  입학: "admissions",
+  학생지원: "studentSupport",
+  시설관리: "facilities",
+};
 
-const createTelHref = (phone) => `tel:${String(phone).replace(/[^\d+]/g, "")}`;
 const BUTTON_BASE_CLASS =
   "rounded-full border font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#003876] focus-visible:ring-offset-2";
 const BUTTON_ACTIVE_CLASS =
@@ -25,27 +38,27 @@ const ICON_BUTTON_CLASS =
   "inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#d7dfeb] bg-white text-[#607290] transition hover:border-[#95a8c7] active:border-[#003876] active:bg-[#003876] active:text-white";
 
 const categoryToneMap = {
-  대표번호: {
+  mainLine: {
     badge: "border-[#F36F21] bg-[#F9C1B0] text-[#9b4a1f]",
     icon: "bg-[#F9C1B0] text-[#F36F21]",
   },
-  행정: {
+  administration: {
     badge: "border-[#003876] bg-[#C6C9D4] text-[#003876]",
     icon: "bg-[#C6C9D4] text-[#003876]",
   },
-  학사: {
+  academics: {
     badge: "border-[#ffb400] bg-[#FFDBAE] text-[#8a6400]",
     icon: "bg-[#FFDBAE] text-[#b57d00]",
   },
-  입학: {
+  admissions: {
     badge: "border-[#F36F21] bg-[#F9C1B0] text-[#9b4a1f]",
     icon: "bg-[#F9C1B0] text-[#F36F21]",
   },
-  학생지원: {
+  studentSupport: {
     badge: "border-[#00AB39] bg-[#B7DCBC] text-[#0c6d2d]",
     icon: "bg-[#B7DCBC] text-[#00AB39]",
   },
-  시설관리: {
+  facilities: {
     badge: "border-[#003876] bg-[#C6C9D4] text-[#003876]",
     icon: "bg-[#C6C9D4] text-[#003876]",
   },
@@ -56,30 +69,120 @@ const defaultTone = {
   icon: "bg-[#C6C9D4] text-[#003876]",
 };
 
-export default function PhonePage() {
-  const [activeCampus, setActiveCampus] = useState(campusTabs[0]?.campus ?? "");
-  const [activeCategory, setActiveCategory] = useState(ALL_CATEGORY);
-  const [keyword, setKeyword] = useState("");
+const normalizeText = (value) =>
+  String(value ?? "")
+    .toLowerCase()
+    .replace(/\s+/g, "");
+
+const createTelHref = (phone) => `tel:${String(phone).replace(/[^\d+]/g, "")}`;
+
+const getCategoryKey = (category) => CATEGORY_KEY_BY_NAME[category] ?? ALL_CATEGORY;
+
+const getTranslatedText = (t, key, language, fallback = "") => {
+  const keyPath = `phone.${key}`;
+  const translated = t(keyPath, language);
+  return translated === keyPath ? fallback : translated;
+};
+
+const matchesKeyword = (keyword, values) =>
+  values.some((value) => normalizeText(value).includes(keyword));
+
+function PhoneDirectoryContent() {
+  const { currentLang, setCurrentLang, t } = useLanguage();
+  const searchParams = useSearchParams();
+  const requestedLanguage = searchParams.get("lang");
+  const requestedCampus = searchParams.get("campus");
+  const requestedCategory = searchParams.get("category");
+  const requestedKeyword = searchParams.get("q") ?? "";
+  const activeLanguage = SUPPORTED_LANGUAGES.includes(requestedLanguage)
+    ? requestedLanguage
+    : currentLang;
+  const activeCampus = campusTabs.some((item) => item.campus === requestedCampus)
+    ? requestedCampus
+    : campusTabs[0]?.campus ?? "";
+  const [keyword, setKeyword] = useState(requestedKeyword);
   const deferredKeyword = useDeferredValue(keyword);
 
+  const phoneT = useCallback(
+    (key, fallback = "") => getTranslatedText(t, key, activeLanguage, fallback),
+    [activeLanguage, t],
+  );
   const currentCampusInfo =
     campusTabs.find((item) => item.campus === activeCampus) ?? campusTabs[0];
+  const currentCampusKey = currentCampusInfo?.id ?? "suwon";
+
+  useEffect(() => {
+    if (
+      requestedLanguage &&
+      SUPPORTED_LANGUAGES.includes(requestedLanguage) &&
+      requestedLanguage !== currentLang
+    ) {
+      setCurrentLang(requestedLanguage);
+    }
+  }, [currentLang, requestedLanguage, setCurrentLang]);
+
+  useEffect(() => {
+    setKeyword(requestedKeyword);
+  }, [requestedKeyword]);
 
   const campusSections = useMemo(
     () => phoneDirectory.filter((section) => section.campus === activeCampus),
     [activeCampus],
   );
 
-  const availableCategories = useMemo(
-    () => [ALL_CATEGORY, ...campusSections.map((section) => section.category)],
-    [campusSections],
-  );
+  const activeCategory =
+    requestedCategory &&
+    campusSections.some((section) => section.category === requestedCategory)
+      ? requestedCategory
+      : ALL_CATEGORY;
 
-  useEffect(() => {
-    if (!availableCategories.includes(activeCategory)) {
-      setActiveCategory(ALL_CATEGORY);
+  const campusCopy = {
+    label: phoneT(`campuses.${currentCampusKey}.label`, currentCampusInfo?.label),
+    address: phoneT(`campuses.${currentCampusKey}.address`, currentCampusInfo?.address),
+    description: phoneT(
+      `campuses.${currentCampusKey}.description`,
+      currentCampusInfo?.description,
+    ),
+  };
+
+  const createPhoneHref = ({
+    campus = activeCampus,
+    category = activeCategory,
+    q = keyword,
+  } = {}) => {
+    const params = new URLSearchParams();
+
+    if (campus) {
+      params.set("campus", campus);
     }
-  }, [activeCategory, availableCategories]);
+
+    params.set("lang", activeLanguage);
+
+    if (category && category !== ALL_CATEGORY) {
+      params.set("category", category);
+    }
+
+    if (q.trim()) {
+      params.set("q", q.trim());
+    }
+
+    return `/phone?${params.toString()}`;
+  };
+
+  const availableCategories = useMemo(
+    () => [
+      { id: ALL_CATEGORY, label: phoneT("categories.all") },
+      ...campusSections.map((section) => {
+        const categoryKey = getCategoryKey(section.category);
+
+        return {
+          id: section.category,
+          label: phoneT(`categories.${categoryKey}`, section.category),
+        };
+      }),
+    ],
+    [campusSections, phoneT],
+  );
 
   const filteredSections = useMemo(() => {
     const normalizedKeyword = normalizeText(deferredKeyword);
@@ -90,33 +193,65 @@ export default function PhonePage() {
           activeCategory === ALL_CATEGORY || section.category === activeCategory,
       )
       .map((section) => {
+        const categoryKey = getCategoryKey(section.category);
+        const localizedCategory = phoneT(`categories.${categoryKey}`, section.category);
         const sectionMatched =
           normalizedKeyword.length > 0 &&
-          [section.category, section.campus].some((value) =>
-            normalizeText(value).includes(normalizedKeyword),
-          );
-
-        const departments = section.departments.filter((department) => {
-          if (!normalizedKeyword || sectionMatched) {
-            return true;
-          }
-
-          return [
-            department.name,
-            department.phone,
-            department.description,
+          matchesKeyword(normalizedKeyword, [
             section.category,
-            section.campus,
-          ].some((value) => normalizeText(value).includes(normalizedKeyword));
-        });
+            localizedCategory,
+            currentCampusInfo?.campus,
+            campusCopy.label,
+            campusCopy.address,
+            campusCopy.description,
+          ]);
+
+        const departments = section.departments
+          .map((department) => ({
+            ...department,
+            localizedName: phoneT(
+              `departments.${department.id}.name`,
+              department.name,
+            ),
+            localizedDescription: phoneT(
+              `departments.${department.id}.description`,
+              department.description,
+            ),
+          }))
+          .filter((department) => {
+            if (!normalizedKeyword || sectionMatched) {
+              return true;
+            }
+
+            return matchesKeyword(normalizedKeyword, [
+              department.name,
+              department.phone,
+              department.description,
+              department.localizedName,
+              department.localizedDescription,
+              section.category,
+              localizedCategory,
+            ]);
+          });
 
         return {
           ...section,
+          categoryKey,
+          localizedCategory,
           departments,
         };
       })
       .filter((section) => section.departments.length > 0);
-  }, [activeCategory, campusSections, deferredKeyword]);
+  }, [
+    activeCategory,
+    campusCopy.address,
+    campusCopy.description,
+    campusCopy.label,
+    campusSections,
+    currentCampusInfo?.campus,
+    deferredKeyword,
+    phoneT,
+  ]);
 
   const campusContactCount = campusSections.reduce(
     (total, section) => total + section.departments.length,
@@ -128,18 +263,21 @@ export default function PhonePage() {
     0,
   );
 
+  const formatDepartmentCount = (count) =>
+    `${count}${phoneT("units.departments", " departments")}`;
+
   return (
     <main className="min-h-[calc(100dvh-136px)] bg-[#C6C9D4] px-4 py-5 text-[#27324b]">
       <section className="rounded-[28px] border border-[#d8dce6] bg-[#f9fbff] p-4 shadow-[0_18px_40px_rgba(42,53,80,0.08)]">
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[#F36F21]">
-            Campus Contacts
+            {phoneT("page.eyebrow")}
           </p>
-          <h1 className="mt-2 text-[26px] font-extrabold tracking-[-0.05em] text-[#27324b]">
-            전화번호 안내
+          <h1 className="mt-2 text-[26px] font-extrabold tracking-normal text-[#27324b]">
+            {phoneT("page.title")}
           </h1>
           <p className="mt-2 break-keep text-sm leading-6 text-[#677489]">
-            캠퍼스별 주요 부서 연락처를 빠르게 찾고 바로 전화 연결할 수 있습니다.
+            {phoneT("page.description")}
           </p>
         </div>
 
@@ -148,19 +286,20 @@ export default function PhonePage() {
             const isActive = tab.campus === activeCampus;
 
             return (
-              <button
+              <a
                 key={tab.id}
-                type="button"
-                onClick={() => setActiveCampus(tab.campus)}
+                href={createPhoneHref({
+                  campus: tab.campus,
+                  category: ALL_CATEGORY,
+                })}
+                role="button"
                 aria-pressed={isActive}
                 className={`${BUTTON_BASE_CLASS} px-4 py-3 text-sm ${
-                  isActive
-                    ? BUTTON_ACTIVE_CLASS
-                    : BUTTON_IDLE_CLASS
+                  isActive ? BUTTON_ACTIVE_CLASS : BUTTON_IDLE_CLASS
                 }`}
               >
-                {tab.label}
-              </button>
+                {phoneT(`campuses.${tab.id}.label`, tab.label)}
+              </a>
             );
           })}
         </div>
@@ -169,25 +308,25 @@ export default function PhonePage() {
           <div className="mt-4 rounded-[22px] border border-[#c2cedf] bg-[#eef3fb] p-4">
             <div className="flex items-start gap-2 text-sm text-[#526076]">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#F36F21]" />
-              <p className="font-semibold leading-5">{currentCampusInfo.address}</p>
+              <p className="font-semibold leading-5">{campusCopy.address}</p>
             </div>
 
             <p className="mt-3 break-keep text-xs leading-5 text-[#8c96a7]">
-              {currentCampusInfo.description}
+              {campusCopy.description}
             </p>
 
             <div className="mt-4 grid grid-cols-2 gap-2">
               <div className="rounded-[18px] border border-[#ffb400]/35 bg-[#FFDBAE] px-3 py-3">
                 <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#8a6400]">
-                  Category
+                  {phoneT("page.categoryStat")}
                 </p>
                 <p className="mt-1 text-lg font-extrabold text-[#6f5200]">
-                  {campusSections.length}개
+                  {campusSections.length}
                 </p>
               </div>
               <div className="rounded-[18px] border border-[#00AB39]/30 bg-[#B7DCBC] px-3 py-3">
                 <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#0c6d2d]">
-                  Contacts
+                  {phoneT("page.contactsStat")}
                 </p>
                 <p className="mt-1 text-lg font-extrabold text-[#0c6d2d]">
                   {visibleCount}
@@ -200,45 +339,49 @@ export default function PhonePage() {
           </div>
         ) : null}
 
-        <div className="relative mt-5">
+        <form action="/phone" method="get" className="relative mt-5">
+          <input type="hidden" name="campus" value={activeCampus} />
+          <input type="hidden" name="lang" value={activeLanguage} />
+          {activeCategory !== ALL_CATEGORY ? (
+            <input type="hidden" name="category" value={activeCategory} />
+          ) : null}
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#4f6486]" />
           <input
+            name="q"
             type="search"
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
-            placeholder="부서명 또는 전화번호를 검색하세요"
+            placeholder={phoneT("page.searchPlaceholder")}
             className="h-12 w-full rounded-[20px] border border-[#d5dce7] bg-white pl-11 pr-11 text-sm text-[#27324b] outline-none transition placeholder:text-[#99a3b2] focus:border-[#003876] focus:ring-4 focus:ring-[#c7d8ee]"
           />
           {keyword ? (
-            <button
-              type="button"
-              onClick={() => setKeyword("")}
-              aria-label="검색어 지우기"
+            <a
+              href={createPhoneHref({ q: "" })}
+              role="button"
+              aria-label={phoneT("page.clearSearchAria")}
               className={`absolute right-3 top-1/2 -translate-y-1/2 ${ICON_BUTTON_CLASS}`}
             >
               <X className="h-4 w-4" />
-            </button>
+            </a>
           ) : null}
-        </div>
+        </form>
 
         <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
           {availableCategories.map((category) => {
-            const isActive = category === activeCategory;
+            const isActive = category.id === activeCategory;
 
             return (
-              <button
-                key={category}
-                type="button"
-                onClick={() => setActiveCategory(category)}
+              <a
+                key={category.id}
+                href={createPhoneHref({ category: category.id })}
+                role="button"
                 aria-pressed={isActive}
                 className={`${BUTTON_BASE_CLASS} shrink-0 px-4 py-2 text-xs ${
-                  isActive
-                    ? BUTTON_ACTIVE_CLASS
-                    : BUTTON_IDLE_CLASS
+                  isActive ? BUTTON_ACTIVE_CLASS : BUTTON_IDLE_CLASS
                 }`}
               >
-                {category}
-              </button>
+                {category.label}
+              </a>
             );
           })}
         </div>
@@ -247,7 +390,7 @@ export default function PhonePage() {
       <section className="mt-5 space-y-5">
         {filteredSections.length > 0 ? (
           filteredSections.map((section) => {
-            const tone = categoryToneMap[section.category] ?? defaultTone;
+            const tone = categoryToneMap[section.categoryKey] ?? defaultTone;
 
             return (
               <section
@@ -259,10 +402,10 @@ export default function PhonePage() {
                     className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-extrabold ${tone.badge}`}
                   >
                     <Building2 className="h-4 w-4" />
-                    {section.category}
+                    {section.localizedCategory}
                   </div>
                   <p className="text-xs font-bold text-[#7e8997]">
-                    {section.departments.length}개 부서
+                    {formatDepartmentCount(section.departments.length)}
                   </p>
                 </div>
 
@@ -280,23 +423,25 @@ export default function PhonePage() {
 
                       <div className="min-w-0">
                         <h2 className="truncate text-[16px] font-extrabold tracking-[-0.02em] text-[#2a3550]">
-                          {department.name}
+                          {department.localizedName}
                         </h2>
                         <p className="mt-1 text-sm font-bold text-[#536076]">
                           {department.phone}
                         </p>
                         <p className="mt-1 break-keep text-xs leading-5 text-[#6d7789]">
-                          {department.description}
+                          {department.localizedDescription}
                         </p>
                       </div>
 
                       <a
                         href={createTelHref(department.phone)}
                         className={`${BUTTON_BASE_CLASS} ${PHONE_BUTTON_CLASS} ${BUTTON_IDLE_CLASS} visited:text-[#003876] active:border-[#003876] active:bg-[#003876] active:text-white`}
-                        aria-label={`${department.name} 전화걸기 ${department.phone}`}
+                        aria-label={`${department.localizedName} ${phoneT(
+                          "page.callAction",
+                        )} ${department.phone}`}
                       >
                         <PhoneCall className="h-4 w-4" />
-                        전화걸기
+                        {phoneT("page.callAction")}
                       </a>
                     </article>
                   ))}
@@ -310,14 +455,22 @@ export default function PhonePage() {
               <Search className="h-5 w-5" />
             </div>
             <h2 className="mt-4 text-lg font-extrabold text-[#27324b]">
-              검색 결과가 없습니다
+              {phoneT("page.noResultsTitle")}
             </h2>
             <p className="mt-2 break-keep text-sm leading-6 text-[#6d7789]">
-              부서명, 전화번호, 카테고리 기준으로 다시 검색해보세요.
+              {phoneT("page.noResultsDescription")}
             </p>
           </div>
         )}
       </section>
     </main>
+  );
+}
+
+export default function PhonePage() {
+  return (
+    <Suspense fallback={null}>
+      <PhoneDirectoryContent />
+    </Suspense>
   );
 }
