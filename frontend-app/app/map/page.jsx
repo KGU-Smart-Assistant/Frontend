@@ -847,7 +847,7 @@ export default function MapPage() {
               <main className="min-h-screen bg-[linear-gradient(180deg,#d7deea_0%,#c6c9d4_100%)] text-slate-900">
                 <div className="mx-auto w-full max-w-[430px] px-4 py-4">
                   <header className="overflow-hidden rounded-[32px] bg-gradient-to-r from-[#dae2ef] via-[#d1d9e6] to-[#c3d0e2] p-4 shadow-[0_22px_55px_rgba(0,56,118,0.08)] sm:p-7">
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex flex-col gap-5">
                       <div className="min-w-0">
       
                         <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#003876]">
@@ -863,7 +863,7 @@ export default function MapPage() {
                           {t("map.ui.mobileDescription")}
                         </p>
 
-                        <p className="mt-3 hidden max-w-3xl break-keep text-sm leading-7 text-[#4d6688] sm:block sm:text-base">
+                        <p className="mt-3 break-keep text-sm leading-6 text-[#4d6688]">
                           {t(campusMapData.description)}
                         </p>
 
@@ -889,7 +889,7 @@ export default function MapPage() {
                       </div>
                     </div>
 
-                    <div className="hidden w-full max-w-sm rounded-[26px] border border-white/70 bg-white/55 p-4 backdrop-blur md:p-5 lg:block">
+                    <div className="hidden">
                       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#003876]">
                         {t("map.ui.campusInfo")}
                       </p>
@@ -916,7 +916,7 @@ export default function MapPage() {
                    </div>
                   </header>
 
-        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_380px] lg:items-start">
+        <div className="mt-5 grid gap-5">
           <section className="min-w-0 space-y-5">
             <SearchBar
               searchTerm={searchTerm}
@@ -1006,7 +1006,7 @@ export default function MapPage() {
               ) : null}
             </div>
 
-            <div className="space-y-4 lg:hidden">
+            <div className="space-y-4">
               <MobilePanelTabs
                 activeTab={mobilePanelTab}
                 onChange={setMobilePanelTab}
@@ -1038,7 +1038,7 @@ export default function MapPage() {
             </div>
           </section>
 
-          <aside className="hidden min-w-0 space-y-5 lg:block">
+          <aside className="hidden">
             <SelectedBuildingCard
               building={activeBuilding}
               onLocate={(building) => selectBuilding(building)}
