@@ -6,16 +6,19 @@ export default function BottomNav() {
       style={{
         position: "fixed",
         bottom: 0,
-        left: 0,
+        left: "50%",
+        transform: "translateX(-50%)",
         width: "100%",
+        maxWidth: "430px",
+        boxSizing: "border-box",
         display: "flex",
         justifyContent: "space-around",
         padding: "16px",
-        backgroundColor: "#111",
+        backgroundColor: "#003876", // 여기 변경
         borderTop: "1px solid #333",
         zIndex: 100,
-      }}
-    >
+  }}
+>
       <Link href="/" style={{ color: "white", textDecoration: "none" }}>
         홈
       </Link>

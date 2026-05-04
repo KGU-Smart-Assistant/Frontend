@@ -1,6 +1,7 @@
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 export const metadata = {
   title: "KGU Smart Assistant",
@@ -17,7 +18,6 @@ export default function RootLayout({ children }) {
           color: "white",
         }}
       >
-        {/* 모바일 화면 비율 고정 */}
         <div
           style={{
             width: "100%",
@@ -29,9 +29,11 @@ export default function RootLayout({ children }) {
             backgroundColor: "black",
           }}
         >
-          <Header />
-          {children}
-          <BottomNav />
+          <LanguageProvider>
+            <Header />
+            {children}
+            <BottomNav />
+          </LanguageProvider>
         </div>
       </body>
     </html>

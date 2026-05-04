@@ -1,16 +1,25 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { initialMessages, getMockResponse } from "@/data/mockChatData";
+import { getInitialMessages, getMockResponse } from "@/data/mockChatData";
 import ChatMessage from "@/components/ChatMessage";
 import ChatInput from "@/components/ChatInput";
-import { Calendar, Plane, CreditCard } from "lucide-react";
+import QuickActions from "@/components/QuickActions";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Home() {
+  const { currentLang } = useLanguage();
   // [프론트엔드 테스트용 State] 대화 목록을 관리합니다.
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState(() => getInitialMessages("kr"));
   const scrollRef = useRef(null);
-  const nextMessageIdRef = useRef(initialMessages.length);
+  const nextMessageIdRef = useRef(1); // 초기 메시지가 1개이므로 1부터 시작
+
+  useEffect(() => {
+    // 언어 변경 시 채팅 기록이 초기 메시지뿐이라면, 해당 언어로 갱신
+    if (messages.length <= 1) {
+      setMessages(getInitialMessages(currentLang));
+    }
+  }, [currentLang]);
 
   // 렌더 중 Date.now를 호출하지 않도록, 이벤트마다 순차 ID를 발급합니다.
   const getNextMessageId = () => {
@@ -26,7 +35,7 @@ export default function Home() {
   }, [messages]);
 
   // 새로운 메시지를 전송하는 함수
-  const handleSendMessage = (text) => {
+  const handleSendMessage = (text, payload = null) => {
     // 1. 사용자 메시지 목록에 추가
     const newUserMessage = {
       id: getNextMessageId(),
@@ -36,9 +45,17 @@ export default function Home() {
     
     setMessages((prev) => [...prev, newUserMessage]);
 
+    // 백엔드로 전송될 실제 데이터 (payload가 있으면 payload, 없으면 텍스트 원본)
+    const dataToSend = payload || text;
+
     // 2. 가상의 봇 응답 스케줄링 (자연스러운 딜레이를 위해 0.6초 뒤 전송)
     setTimeout(() => {
-      const botResponse = getMockResponse(text);
+      // API 요청 시 body에 들어갈 데이터 구조를 시뮬레이션
+      const requestBody = {
+        message: dataToSend,
+        language: currentLang
+      };
+      const botResponse = getMockResponse(requestBody);
       const newBotMessage = {
         id: getNextMessageId(),
         sender: "bot",
@@ -49,16 +66,9 @@ export default function Home() {
     }, 600); // 0.6초 대기
   };
 
-  // 자주 묻는 질문(Quick Actions) 데이터
-  const quickActions = [
-    { label: "학사일정", icon: <Calendar size={14} />, query: "학사일정에 대해 알려주세요." },
-    { label: "교환학생", icon: <Plane size={14} />, query: "교환학생에 대해서 알려주세요." },
-    { label: "등록금/장학", icon: <CreditCard size={14} />, query: "등록금 납부 관련해서 알려주세요." },
-  ];
-
   // h-[calc(100vh-136px)] matches viewport height minus Header(56px) and BottomNav(80px padding area approx)
   return (
-    <div className="flex flex-col h-[calc(100vh-136px)] bg-gray-100">
+    <div className="flex h-[calc(100vh-136px)] flex-col bg-[#C6C9D4]">
       
       {/* 채팅 메시지가 출력되는 스크롤 영역 */}
       <div 
@@ -71,23 +81,15 @@ export default function Home() {
       </div>
 
       {/* 하단 영역 (Quick Actions + Chat Input) */}
-      <div className="w-full bg-black border-t border-gray-800 flex flex-col pt-2 shrink-0">
+      <div className="relative w-full bg-[#003876] border-t border-[#003876] flex flex-col pt-2 shrink-0">
         {/* 자주 묻는 질문 (Quick Actions) 버튼 그룹 */}
-        <div className="flex gap-2 px-4 pb-2 overflow-x-auto scrollbar-hide items-center">
-          {quickActions.map((action, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleSendMessage(action.query)}
-              className="flex items-center gap-1.5 whitespace-nowrap bg-[#1E1E1E] text-gray-300 py-1.5 px-3 rounded-full text-xs font-medium border border-gray-700 hover:bg-gray-800 transition-colors"
-            >
-              {action.icon}
-              {action.label}
-            </button>
-          ))}
-        </div>
+        <QuickActions onActionClick={handleSendMessage} />
 
         {/* 텍스트 입력창 */}
         <ChatInput onSendMessage={handleSendMessage} />
+
+        {/* 하단 padding-bottom에 의한 빈 공간을 덮어주기 위한 가상 요소 */}
+        <div className="absolute top-full left-0 right-0 h-[100px] bg-[#003876]" />
       </div>
     </div>
   );
