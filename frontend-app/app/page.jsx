@@ -42,13 +42,21 @@ export default function Home() {
       sender: "user",
       reply: text,
     };
-    
-    setMessages((prev) => [...prev, newUserMessage]);
+
+    const loadingMessageId = getNextMessageId();
+    const loadingMessage = {
+      id: loadingMessageId,
+      sender: "bot",
+      isThinking: true,
+      startTime: Date.now(),
+    };
+
+    setMessages((prev) => [...prev, newUserMessage, loadingMessage]);
 
     // 백엔드로 전송될 실제 데이터 (payload가 있으면 payload, 없으면 텍스트 원본)
     const dataToSend = payload || text;
 
-    // 2. 가상의 봇 응답 스케줄링 (자연스러운 딜레이를 위해 0.6초 뒤 전송)
+    // 2. 가상의 봇 응답 스케줄링 (로딩 UI를 보기 위해 2.5초로 연장)
     setTimeout(() => {
       // API 요청 시 body에 들어갈 데이터 구조를 시뮬레이션
       const requestBody = {
@@ -57,21 +65,21 @@ export default function Home() {
       };
       const botResponse = getMockResponse(requestBody);
       const newBotMessage = {
-        id: getNextMessageId(),
+        id: loadingMessageId,
         sender: "bot",
         reply: botResponse.reply,
         intent: botResponse.intent,
       };
-      setMessages((prev) => [...prev, newBotMessage]);
-    }, 600); // 0.6초 대기
+      setMessages((prev) => prev.map(msg => msg.id === loadingMessageId ? newBotMessage : msg));
+    }, 2500); //2500 이건 로딩 UI를 보기 위한 임시 수치임 백업 탑재시 0 혹은 삭제 바람
   };
 
   // h-[calc(100vh-136px)] matches viewport height minus Header(56px) and BottomNav(80px padding area approx)
   return (
     <div className="flex h-[calc(100vh-136px)] flex-col bg-[#C6C9D4]">
-      
+
       {/* 채팅 메시지가 출력되는 스크롤 영역 */}
-      <div 
+      <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto px-4 py-6 scrollbar-hide flex flex-col"
       >
