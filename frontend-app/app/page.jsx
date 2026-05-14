@@ -71,7 +71,7 @@ export default function Home() {
         intent: botResponse.intent,
       };
       setMessages((prev) => prev.map(msg => msg.id === loadingMessageId ? newBotMessage : msg));
-    }, 2500); //2500 이건 로딩 UI를 보기 위한 임시 수치임 백업 탑재시 0 혹은 삭제 바람
+    }, 0); //2500 이건 로딩 UI를 보기 위한 임시 수치임 백업 탑재시 0 혹은 삭제 바람
   };
 
   // h-[calc(100vh-136px)] matches viewport height minus Header(56px) and BottomNav(80px padding area approx)
