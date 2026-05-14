@@ -18,6 +18,7 @@
     "map": "I will guide you to the location you requested.",
     "phone": "Here are the department phone numbers. (Main number: 031-249-9114)",
     "cafeteria": "Today's menu at Gamseong Core cafeteria is Tonkatsu and Spicy Stir-fried Pork.",
-    "fallback": "I'm sorry. I am still learning about that topic. Please ask another question!"
+    "fallback": "I'm sorry. I am still learning about that topic. Please ask another question!",
+    "thinking": "Thinking for {{time}} seconds...."
   }
 }
