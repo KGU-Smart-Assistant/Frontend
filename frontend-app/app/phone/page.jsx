@@ -13,6 +13,7 @@ import { useSearchParams } from "next/navigation";
 
 import { useLanguage } from "@/contexts/LanguageContext";
 import { campusTabs, phoneDirectory } from "@/data/phoneDirectory";
+import { mergePhoneDirectories, requestPhoneDirectory } from "@/lib/phoneApi";
 
 const ALL_CATEGORY = "all";
 const SUPPORTED_LANGUAGES = ["kr", "en", "zh", "ja"];
@@ -101,6 +102,7 @@ function PhoneDirectoryContent() {
     ? requestedCampus
     : campusTabs[0]?.campus ?? "";
   const [keyword, setKeyword] = useState(requestedKeyword);
+  const [apiPhoneDirectory, setApiPhoneDirectory] = useState([]);
   const deferredKeyword = useDeferredValue(keyword);
 
   const phoneT = useCallback(
@@ -125,9 +127,32 @@ function PhoneDirectoryContent() {
     setKeyword(requestedKeyword);
   }, [requestedKeyword]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    requestPhoneDirectory({ signal: controller.signal })
+      .then((directory) => {
+        if (directory.length > 0) {
+          setApiPhoneDirectory(directory);
+        }
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          console.warn("Failed to load contacts API. Using local phone data.", error);
+        }
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const directory = useMemo(
+    () => mergePhoneDirectories(phoneDirectory, apiPhoneDirectory),
+    [apiPhoneDirectory],
+  );
+
   const campusSections = useMemo(
-    () => phoneDirectory.filter((section) => section.campus === activeCampus),
-    [activeCampus],
+    () => directory.filter((section) => section.campus === activeCampus),
+    [activeCampus, directory],
   );
 
   const activeCategory =
