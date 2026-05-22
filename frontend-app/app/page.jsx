@@ -43,43 +43,60 @@ export default function Home() {
       reply: text,
     };
     
-    setMessages((prev) => [
-      ...(prev.length > 0 ? prev : getInitialMessages(currentLang)),
-      newUserMessage,
-    ]);
-
+const loadingMessageId = getNextMessageId();
+const loadingMessage = {
+  id: loadingMessageId,
+  sender: "bot",
+  isThinking: true,
+  startTime: Date.now(),
+};
+setMessages((prev) => [
+  ...(prev.length > 0 ? prev : getInitialMessages(currentLang)),
+  newUserMessage,
+  loadingMessage,
+]);
     // 백엔드로 전송될 실제 데이터 (payload가 있으면 payload, 없으면 텍스트 원본)
     const dataToSend = payload || text;
+    
+// 2. API 호출 및 봇 응답 처리
+const requestBody = {
+  message: dataToSend,
+  language: currentLang,
+};
 
-    const requestBody = {
-      message: dataToSend,
-      language: currentLang,
-    };
-
-    let botResponse;
-
-    try {
-      botResponse = await requestChatResponse(requestBody);
-    } catch (error) {
-      console.warn("Falling back to mock chat response.", error);
-      botResponse = getMockResponse(requestBody);
-    }
-
-    const newBotMessage = {
-      id: getNextMessageId(),
-      sender: "bot",
-      reply: botResponse.reply,
-      intent: botResponse.intent,
-    };
-    setMessages((prev) => [...prev, newBotMessage]);
+try {
+  const botResponse = await requestChatResponse(requestBody);
+  const newBotMessage = {
+    id: loadingMessageId, // 로딩 메시지 ID 재사용
+    sender: "bot",
+    reply: botResponse.reply,
+    intent: botResponse.intent,
+  };
+  // 로딩 메시지를 실제 메시지로 교체
+  setMessages((prev) => prev.map(msg => 
+    msg.id === loadingMessageId ? newBotMessage : msg
+  ));
+} catch (error) {
+  console.warn("Falling back to mock chat response.", error);
+  const botResponse = getMockResponse(requestBody);
+  const newBotMessage = {
+    id: loadingMessageId,
+    sender: "bot",
+    reply: botResponse.reply,
+    intent: botResponse.intent,
+  };
+  setMessages((prev) => prev.map(msg => 
+    msg.id === loadingMessageId ? newBotMessage : msg
+  ));
+}
   };
 
   // h-[calc(100vh-136px)] matches viewport height minus Header(56px) and BottomNav(80px padding area approx)
   return (
     <div className="flex h-[calc(100vh-136px)] flex-col bg-[#C6C9D4]">
-      
+
       {/* 채팅 메시지가 출력되는 스크롤 영역 */}
-      <div 
+      <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto px-4 py-6 scrollbar-hide flex flex-col"
       >
