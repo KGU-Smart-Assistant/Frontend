@@ -1,9 +1,10 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ExternalLink } from "lucide-react";
 
 // 개별 채팅 말풍선을 그려주는 공통 컴포넌트입니다.
-export default function ChatMessage({ message }) {
+export default function ChatMessage({ message, onLinkButtonClick }) {
   // 발신자가 챗봇인지 판단 (목업 데이터 기준)
   const isBot = message.sender === "bot";
   const { t } = useLanguage();
@@ -49,7 +50,7 @@ export default function ChatMessage({ message }) {
 
         {/* 말풍선 박스. 챗봇은 흰색 배경, 사용자는 경기대 컬러(#003876) 사용 */}
         <div
-          className={`max-w-[80vw] px-4 py-2 rounded-2xl ${isBot
+          className={`max-w-[80vw] px-4 py-2 rounded-2xl break-words overflow-wrap-anywhere ${isBot
             ? "bg-white text-gray-900 rounded-tl-none border border-gray-200 shadow-sm"
             : "bg-[#003876] text-white rounded-tr-none"
             }`}
@@ -63,26 +64,35 @@ export default function ChatMessage({ message }) {
           ) : (
             <>
               {/* 실제 텍스트 대답 내용 */}
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.reply}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{message.reply}</p>
 
-              {/* [목업/테스트용 코드 영역] */}
-              {/* 백엔드 연동 시 전달될 'intent' (의도) 값에 따라 시각적으로 다른 컴포넌트가 떠야 함을 보여주기 위한 가이드/목업 요소입니다. */}
-              {/* 추후 진석/재승님이 만드실 실제 '지도'나 '전화' 컴포넌트로 이를 교체해야 합니다. */}
-
-              {message.intent === "지도" && (
-                <div className="mt-3 bg-gray-50 p-3 rounded-lg flex items-center text-gray-600 text-xs border border-gray-200">
-                  📍 [지도 컴포넌트 영역 - 목업 UI]
+              {/* 링크 버튼들 표시 (하위 항목들 - 클릭 시 챗봇으로 전송) */}
+              {message.links && message.links.length > 0 && (
+                <div className="mt-3 flex flex-col gap-2">
+                  {message.links.map((link, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => onLinkButtonClick && onLinkButtonClick(t(link.label), link.url)}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[#003876] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#00264d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#003876] focus-visible:ring-offset-2"
+                    >
+                      <span className="break-words text-center">{t(link.label)}</span>
+                    </button>
+                  ))}
                 </div>
               )}
-              {message.intent === "전화" && (
-                <div className="mt-3 bg-gray-50 p-3 rounded-lg flex items-center text-gray-600 text-xs border border-gray-200">
-                  📞 [전화 컴포넌트 영역 - 목업 UI]
-                </div>
-              )}
-              {message.intent === "학식" && (
-                <div className="mt-3 bg-gray-50 p-3 rounded-lg flex items-center text-gray-600 text-xs border border-gray-200">
-                  🍱 [학식 컴포넌트 영역 - 목업 UI]
-                </div>
+
+              {/* 단일 링크 바로가기 (실제 링크로 이동) */}
+              {message.finalLink && (
+                <a
+                  href={message.finalLink.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-[#003876] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#00264d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#003876] focus-visible:ring-offset-2"
+                >
+                  <span className="break-words">{t(message.finalLink.label)}{t("infoLinks.learnMore")}</span>
+                  <ExternalLink className="h-4 w-4 shrink-0" />
+                </a>
               )}
             </>
           )}
