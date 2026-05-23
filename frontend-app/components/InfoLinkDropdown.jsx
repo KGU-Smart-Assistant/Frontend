@@ -4,15 +4,33 @@ import { useState } from "react";
 import { Check, ChevronDown, ExternalLink, Link2 } from "lucide-react";
 
 import { kguInfoLinks } from "@/data/kguInfoLinks";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const totalLinkCount = kguInfoLinks.reduce(
   (sum, group) => sum + group.links.length,
   0,
 );
 
-export default function InfoLinkDropdown() {
+export default function InfoLinkDropdown({ onLinkClick }) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [openGroupId, setOpenGroupId] = useState(kguInfoLinks[0]?.id ?? "");
+
+  const handleGroupClick = (group) => {
+    // 그룹 전체 클릭 시 - 모든 하위 링크 전달
+    if (onLinkClick) {
+      onLinkClick(group.title, group.links, true); // isGroup = true
+      setIsOpen(false);
+    }
+  };
+
+  const handleSingleLinkClick = (linkLabel, linkUrl) => {
+    // 개별 링크 클릭 시 - 단일 링크만 전달
+    if (onLinkClick) {
+      onLinkClick(linkLabel, [{ label: linkLabel, url: linkUrl }], false); // isGroup = false
+      setIsOpen(false);
+    }
+  };
 
   return (
     <div className="relative px-4 pb-3">
@@ -22,10 +40,10 @@ export default function InfoLinkDropdown() {
             <Check className="h-5 w-5 shrink-0 text-[#003876]" />
             <div className="min-w-0">
               <p className="truncate text-sm font-extrabold">
-                더 많은 정보 알아보기
+                {t("infoLinks.title")}
               </p>
               <p className="text-[11px] font-semibold text-[#69748a]">
-                {kguInfoLinks.length}개 분류 · {totalLinkCount}개 바로가기
+                {kguInfoLinks.length}{t("infoLinks.categories")} · {totalLinkCount}{t("infoLinks.links")}
               </p>
             </div>
           </div>
@@ -36,50 +54,60 @@ export default function InfoLinkDropdown() {
 
               return (
                 <section key={group.id} className="border-b border-[#edf0f5] last:border-b-0">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setOpenGroupId((currentId) =>
-                        currentId === group.id ? "" : group.id,
-                      )
-                    }
-                    aria-expanded={isGroupOpen}
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-[#f4f7fb]"
-                  >
-                    <span className="flex min-w-0 items-center gap-2">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#C6C9D4] text-[#003876]">
-                        <Link2 className="h-4 w-4" />
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block truncate text-[15px] font-extrabold text-[#202739]">
-                          {group.title}
+                  <div className="flex">
+                    {/* 그룹 제목 클릭 영역 - 챗봇으로 전송 */}
+                    <button
+                      type="button"
+                      onClick={() => handleGroupClick(group)}
+                      className="flex-1 flex items-center gap-3 px-4 py-3 text-left transition hover:bg-[#f4f7fb]"
+                    >
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#C6C9D4] text-[#003876]">
+                          <Link2 className="h-4 w-4" />
                         </span>
-                        <span className="text-xs font-semibold text-[#7b8498]">
-                          {group.links.length}개 링크
+                        <span className="min-w-0">
+                          <span className="block truncate text-[15px] font-extrabold text-[#202739]">
+                            {t(group.title)}
+                          </span>
+                          <span className="text-xs font-semibold text-[#7b8498]">
+                            {group.links.length}{t("infoLinks.links")}
+                          </span>
                         </span>
                       </span>
-                    </span>
-                    <ChevronDown
-                      className={`h-5 w-5 shrink-0 text-[#69748a] transition ${
-                        isGroupOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
+                    </button>
+                    
+                    {/* 확장/축소 버튼 */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOpenGroupId((currentId) =>
+                          currentId === group.id ? "" : group.id,
+                        )
+                      }
+                      aria-expanded={isGroupOpen}
+                      className="flex items-center justify-center px-4 py-3 transition hover:bg-[#f4f7fb]"
+                    >
+                      <ChevronDown
+                        className={`h-5 w-5 shrink-0 text-[#69748a] transition ${
+                          isGroupOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                  </div>
 
                   {isGroupOpen ? (
                     <div className="bg-[#f8fafc] px-3 pb-3">
                       <div className="overflow-hidden rounded-2xl border border-[#e4e8f0] bg-white">
                         {group.links.map((link) => (
-                          <a
+                          <button
                             key={`${group.id}-${link.label}`}
-                            href={link.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center justify-between gap-3 border-b border-[#eef1f6] px-4 py-3 text-sm font-bold text-[#202739] transition last:border-b-0 hover:bg-[#eef3fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#003876]"
+                            type="button"
+                            onClick={() => handleSingleLinkClick(link.label, link.url)}
+                            className="flex w-full items-center justify-between gap-3 border-b border-[#eef1f6] px-4 py-3 text-sm font-bold text-[#202739] transition last:border-b-0 hover:bg-[#eef3fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#003876]"
                           >
-                            <span className="min-w-0 truncate">{link.label}</span>
+                            <span className="min-w-0 truncate">{t(link.label)}</span>
                             <ExternalLink className="h-4 w-4 shrink-0 text-[#003876]" />
-                          </a>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -97,7 +125,7 @@ export default function InfoLinkDropdown() {
         aria-expanded={isOpen}
         className="flex h-12 w-full items-center justify-between rounded-[18px] border-2 border-white/80 bg-white px-4 text-left text-sm font-extrabold text-[#003876] shadow-[0_8px_18px_rgba(0,0,0,0.16)] transition hover:bg-[#eef3fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
       >
-        <span>더 많은 정보 알아보기</span>
+        <span>{t("infoLinks.title")}</span>
         <ChevronDown
           className={`h-6 w-6 shrink-0 transition ${isOpen ? "rotate-180" : ""}`}
         />
